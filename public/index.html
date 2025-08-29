@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta id="meta-theme-color" name="theme-color" content="#2f5233">
+    <title>GPS Pokalbiai</title>
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/main.css?v=1">
+
+    <!-- External Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <!-- Core modules -->
+    <script src="/js/core/config.js"></script>
+    <script src="/js/core/state.js"></script>
+    <script src="/js/core/dom.js"></script>
+    <script src="/js/core/utils.js"></script>
+    <script src="/js/core/app.js"></script>
+    
+    <!-- API and communication -->
+    <script src="/js/api/api.js"></script>
+    <script src="/js/api/socket.js"></script>
+    
+    <!-- Authentication -->
+    <script src="/js/auth/auth.js"></script>
+    
+    <!-- UI components -->
+    <script src="/js/ui/views.js"></script>
+    <script src="/js/ui/modals.js"></script>
+    <script src="/js/ui/chat.js"></script>
+    <script src="/js/ui/settings.js"></script>
+    <script src="/js/ui/events.js"></script>
+    
+    <!-- Map and location -->
+    <script src="/js/map/map.js"></script>
+    <script src="/js/map/location.js"></script>
+    
+    <!-- Notifications and background -->
+    <script src="/js/notifications/notifications.js"></script>
+    <script src="/js/notifications/background.js"></script>
+    
+    <!-- Admin functionality -->
+    <script src="/js/admin/admin.js"></script>
+    <script src="/js/admin/following.js"></script>
+</head>
+<body>
+    <!-- Authentication Container -->
+    <div id="auth-container">
+        <div class="auth-form">
+            <h2 id="auth-title">Prisijungti</h2>
+            <form id="login-form">
+                <input type="text" id="login-username" placeholder="Vartotojo vardas" required>
+                <input type="password" id="login-password" placeholder="Slaptažodis" required>
+                <label style="display:flex;align-items:center;gap:8px;margin:6px 0 8px 0;cursor:pointer;">
+                    <input type="checkbox" id="remember-me">
+                    <span>Likti prisijungus?</span>
+                </label>
+                <button type="submit">Prisijungti</button>
+                <div class="error" id="login-error"></div>
+            </form>
+            <div class="toggle-link" id="show-register">Neturite paskyros? Registruokitės</div>
+        </div>
+        
+        <div class="auth-form hidden" id="register-form">
+            <h2>Registracija</h2>
+            <form id="register-form-submit">
+                <input type="text" id="register-username" placeholder="Vartotojo vardas" required>
+                <input type="password" id="register-password" placeholder="Slaptažodis" required>
+                <input type="password" id="register-confirm-password" placeholder="Pakartokite slaptažodį" required>
+                <button type="submit">Registruotis</button>
+                <div class="error" id="register-error"></div>
+            </form>
+            <div class="toggle-link" id="show-login">Jau turite paskyrą? Prisijunkite</div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="hidden">
+        <!-- Top Navigation Bar -->
+        <header id="top-bar">
+            <div class="nav-controls">
+                <button class="nav-btn active" data-view="users-list-view">Vartotojai</button>
+                <button class="nav-btn" data-view="map-view">Žemėlapis</button>
+                <button class="nav-btn" data-view="settings-view">Nustatymai</button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content">
+            <!-- Users List View -->
+            <div id="users-list-view" class="view active">
+                <ul id="users-list"></ul>
+            </div>
+            
+            <!-- Map View -->
+            <div id="map-view" class="view">
+                <div id="map"></div>
+            </div>
+            
+            <!-- Settings View -->
+            <div id="settings-view" class="view">
+                <div id="permissions-status"></div>
+                <div id="connection-status" class="setting-item">
+                    <div>
+                        <div style="font-weight:600">Ryšio būklė</div>
+                        <div id="connection-details">Tikrinama...</div>
+                    </div>
+                    <span id="connection-indicator"></span>
+                </div>
+                
+                <h3>Pranešimų Nustatymai</h3>
+                <div class="setting-item">
+                    <label for="sound-toggle">Garsinis pranešimas</label>
+                    <input type="checkbox" id="sound-toggle">
+                </div>
+                <div class="setting-item">
+                    <label for="vibrate-toggle">Vibracinis pranešimas</label>
+                    <input type="checkbox" id="vibrate-toggle">
+                </div>
+                
+                <h3>Fono Funkcijos</h3>
+                <div class="setting-item">
+                    <label for="background-location-toggle">Vietovės sekimas fone</label>
+                    <input type="checkbox" id="background-location-toggle">
+                </div>
+                <div class="setting-item">
+                    <label for="background-notifications-toggle">Pranešimai fone</label>
+                    <input type="checkbox" id="background-notifications-toggle">
+                </div>
+                
+                <button id="test-audio-btn" class="settings-link-btn">🔊 Išbandyti garsą</button>
+                <button id="test-vibration-btn" class="settings-link-btn">📳 Išbandyti vibraciją</button>
+                
+                <h3>Vaizdo Nustatymai</h3>
+                <div class="setting-item">
+                    <label for="theme-toggle">Naktinė tema</label>
+                    <input type="checkbox" id="theme-toggle">
+                </div>
+                <div class="setting-item">
+                    <label for="marker-color">Markerio spalva</label>
+                    <select id="marker-color">
+                        <option value="red">Raudona</option>
+                        <option value="blue">Mėlyna</option>
+                        <option value="green">Žalia</option>
+                        <option value="orange">Oranžinė</option>
+                        <option value="violet">Violetinė</option>
+                    </select>
+                </div>
+                
+                <!-- Admin Panel -->
+                <div id="admin-panel" class="admin-panel">
+                    <h4>👑 Administratoriaus funkcijos</h4>
+                    <button id="pending-users-btn" class="admin-btn">📋 Nepatvirtinti vartotojai</button>
+                    <button id="admin-log-btn" class="admin-btn">📊 Sistema log'ai</button>
+                </div>
+                
+                <button id="logout-btn">Atsijungti</button>
+            </div>
+            
+            <!-- Chat View -->
+            <div id="chat-view" class="view">
+                <div id="chat-header">
+                    <button id="back-to-main-btn">&larr;</button>
+                    <span id="chat-header-title"></span>
+                </div>
+                <div id="messages-list"></div>
+                <form id="message-form">
+                    <input id="message-input" autocomplete="off" placeholder="Jūsų žinutė..." />
+                    <button type="submit">&uarr;</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- System Logs Modal (Admin only) -->
+    <div id="logs-modal" class="modal-backdrop">
+        <div class="modal">
+            <header>
+                <span>📊 Sistema log'ai</span>
+                <button id="logs-close">✕</button>
+            </header>
+            <div class="content">
+                <div class="log-toolbar">
+                    <button id="logs-clear">Išvalyti</button>
+                    <button id="logs-copy">Kopijuoti</button>
+                </div>
+                <pre id="logs-modal-body" class="log-area"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu-overlay" class="hidden">
+        <div id="context-menu-wrapper">
+            <div id="context-menu">
+                <h3 id="context-menu-title"></h3>
+                <div id="context-menu-actions"></div>
+            </div>
+            <div id="context-menu-cancel">
+                <button data-action="cancel">Atšaukti</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Detail Modal -->
+    <div id="user-detail-modal" class="hidden">
+        <div class="user-detail-content">
+            <div class="user-detail-header">
+                <h3 id="user-detail-name"></h3>
+                <button id="user-detail-close">✕</button>
+            </div>
+            <div class="user-detail-body">
+                <div class="user-detail-item">
+                    <label>Vartotojo vardas:</label>
+                    <span id="user-detail-username"></span>
+                </div>
+                <div class="user-detail-item">
+                    <label>Paskyros tipas:</label>
+                    <span id="user-detail-role"></span>
+                </div>
+                <div class="user-detail-item">
+                    <label>Paskyros data:</label>
+                    <span id="user-detail-created"></span>
+                </div>
+                <div class="user-detail-item">
+                    <label>Paskutinis prisijungimas:</label>
+                    <span id="user-detail-last-seen"></span>
+                </div>
+                <div class="user-detail-item">
+                    <label>Dabartinė vietovė:</label>
+                    <span id="user-detail-location"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden">
+        <div id="settings-content">
+            <h2>Nustatymai</h2>
+            <div class="setting-item">
+                <label for="settings-sound">Garsinis pranešimas</label>
+                <input type="checkbox" id="settings-sound">
+            </div>
+            <div class="setting-item">
+                <label for="settings-vibrate">Vibracinis pranešimas</label>
+                <input type="checkbox" id="settings-vibrate">
+            </div>
+            <div class="setting-item">
+                <label for="settings-background-location">Vietovės sekimas fone</label>
+                <input type="checkbox" id="settings-background-location">
+            </div>
+            <div class="setting-item">
+                <label for="settings-background-notifications">Pranešimai fone</label>
+                <input type="checkbox" id="settings-background-notifications">
+            </div>
+            <div class="setting-item">
+                <label for="settings-theme">Tema</label>
+                <select id="settings-theme">
+                    <option value="light">Šviesi</option>
+                    <option value="dark">Tamsi</option>
+                </select>
+            </div>
+            <button id="settings-close">Uždaryti</button>
+        </div>
+    </div>
+
+    <!-- Status Indicators -->
+    <div id="following-indicator">Sekama: <span id="following-username"></span></div>
+    <div id="connection-status" title="Ryšio būsena">
+        <span id="connection-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#d1d5db;vertical-align:middle;margin-right:6px;"></span>
+        <span id="connection-text" style="display:none">Tikrinama...</span>
+    </div>
+
+    <!-- Connection diagnostics modal -->
+    <div id="conn-modal" class="modal-backdrop" style="display:none">
+        <div class="modal" style="max-width:420px">
+            <header>
+                <span>Ryšio diagnostika</span>
+                <button id="conn-close">✕</button>
+            </header>
+            <div class="content">
+                <div id="conn-body" class="log-area" style="white-space:pre-wrap"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
