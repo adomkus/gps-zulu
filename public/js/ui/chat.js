@@ -28,8 +28,10 @@
         addSystemMessage(`💬 Pokalbis "${roomName}" atidarytas!`);
         
         // Load messages
+        perf.log(`🔄 Kraunamos žinutės iš /rooms/${roomId}/messages`);
         window.Api.fetch(`/rooms/${roomId}/messages`)
             .then(messages => {
+                perf.log(`📥 Gautos žinutės:`, messages);
                 el.messagesList.innerHTML = '';
                 const fragment = document.createDocumentFragment();
                 messages.forEach(msg => {
@@ -46,7 +48,7 @@
                 }
             })
             .catch(err => {
-                perf.log(`❌ Klaida užkraunant žinutes: ${err.message}`);
+                perf.log(`❌ Klaida užkraunant žinutes:`, err);
                 addSystemMessage(`⚠️ Klaida kraunant žinutes: ${err.message}`);
             });
     }

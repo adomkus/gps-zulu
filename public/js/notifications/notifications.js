@@ -34,23 +34,29 @@
                 if (permission === 'denied') {
                     hasIssues = true;
                     statusHTML += `
-                        <div class="permission-alert">
-                            <strong>⚠️ Pranešimai užblokuoti</strong><br>
-                            Pranešimai neveiks. Norėdami juos įjungti:
-                            <br><br>
-                            <strong>Chrome/Edge:</strong> Spauskite 🔒 šalia adreso → Leidimais → Pranešimai → Leisti<br>
-                            <strong>Firefox:</strong> Spauskite ℹ️ šalia adreso → Leidimais → Pranešimai<br>
-                            <strong>Safari:</strong> Safari meniu → Nustatymai → Svetainės → Pranešimai
-                            <button class="settings-link-btn" onclick="location.reload()">🔄 Perkrauti po pakeitimų</button>
+                        <div class="alert alert-warning">
+                            <span>⚠️</span>
+                            <div>
+                                <strong>Pranešimai užblokuoti</strong><br>
+                                Pranešimai neveiks. Norėdami juos įjungti:
+                                <br><br>
+                                <strong>Chrome/Edge:</strong> Spauskite 🔒 šalia adreso → Leidimais → Pranešimai → Leisti<br>
+                                <strong>Firefox:</strong> Spauskite ℹ️ šalia adreso → Leidimais → Pranešimai<br>
+                                <strong>Safari:</strong> Safari meniu → Nustatymai → Svetainės → Pranešimai
+                                <button class="settings-link-btn" onclick="location.reload()">🔄 Perkrauti po pakeitimų</button>
+                            </div>
                         </div>
                     `;
                 } else if (permission === 'default') {
                     hasIssues = true;
                     statusHTML += `
-                        <div class="permission-alert">
-                            <strong>📢 Reikia leidimo pranešimams</strong><br>
-                            Spausdami "Leisti" gausite pranešimus apie naujas žinutes.
-                            <button class="settings-link-btn" onclick="notificationManager.requestPermission()">📱 Prašyti leidimo</button>
+                        <div class="alert alert-info">
+                            <span>📢</span>
+                            <div>
+                                <strong>Reikia leidimo pranešimams</strong><br>
+                                Spausdami "Leisti" gausite pranešimus apie naujas žinutes.
+                                <button class="settings-link-btn" onclick="notificationManager.requestPermission()">📱 Prašyti leidimo</button>
+                            </div>
                         </div>
                     `;
                 }
@@ -61,15 +67,18 @@
                 hasIssues = true;
                 const isAndroid = navigator.userAgent.includes('Android');
                 statusHTML += `
-                    <div class="permission-alert">
-                        <strong>🔊 Audio reikia suaktyvinti</strong><br>
-                        ${isAndroid ? 
-                            'Android naršyklės reikalauja vartotojo veiksmo audio paleidimui.<br>' +
-                            'Taip pat patikrinkite telefono nustatymus:<br>' +
-                            '<strong>Nustatymai → Apps → Chrome/Firefox → Leidimai → Mikrofono</strong>' :
-                            'Mobilės naršyklės reikalauja vartotojo veiksmo audio paleidimui.'
-                        }<br>
-                        Išbandykite garsą paspausdami "Išbandyti garsą" mygtuką žemiau.
+                    <div class="alert alert-info">
+                        <span>🔊</span>
+                        <div>
+                            <strong>Audio reikia suaktyvinti</strong><br>
+                            ${isAndroid ? 
+                                'Android naršyklės reikalauja vartotojo veiksmo audio paleidimui.<br>' +
+                                'Taip pat patikrinkite telefono nustatymus:<br>' +
+                                '<strong>Nustatymai → Apps → Chrome/Firefox → Leidimai → Mikrofono</strong>' :
+                                'Mobilės naršyklės reikalauja vartotojo veiksmo audio paleidimui.'
+                            }<br>
+                            Išbandykite garsą paspausdami "Išbandyti garsą" mygtuką žemiau.
+                        </div>
                     </div>
                 `;
             }
@@ -77,9 +86,12 @@
             // Vibration support
             if (!('vibrate' in navigator)) {
                 statusHTML += `
-                    <div class="permission-alert">
-                        <strong>📳 Vibracija nepalaikoma</strong><br>
-                        Jūsų įrenginys nepaliao vibracijos funkcijos.
+                    <div class="alert alert-warning">
+                        <span>📳</span>
+                        <div>
+                            <strong>Vibracija nepalaikoma</strong><br>
+                            Jūsų įrenginys nepaliao vibracijos funkcijos.
+                        </div>
                     </div>
                 `;
             }
@@ -87,9 +99,12 @@
             // Success message if all is working
             if (!hasIssues && audioReady && notificationReady) {
                 statusHTML += `
-                    <div class="permission-alert" style="background: #d4edda; border-color: #c3e6cb; color: #155724;">
-                        <strong>✅ Viskas veikia!</strong><br>
-                        Audio, vibracija ir pranešimai sukonfigūruoti teisingai.
+                    <div class="alert alert-success">
+                        <span>✅</span>
+                        <div>
+                            <strong>Viskas veikia!</strong><br>
+                            Audio, vibracija ir pranešimai sukonfigūruoti teisingai.
+                        </div>
                     </div>
                 `;
             }

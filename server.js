@@ -453,6 +453,13 @@ apiRouter.get('/rooms/:roomId/messages', async (req, res) => {
         if (participationCheck.rowCount === 0) {
             return res.status(403).json({ message: 'Jūs nepriklausote šiam pokalbių kambariui.' });
         }
+        // Try to add read_at column if it doesn't exist
+        try {
+            await pool.query("ALTER TABLE messages ADD COLUMN IF NOT EXISTS read_at TIMESTAMP");
+        } catch (err) {
+            // Column might already exist, ignore error
+        }
+        
         const messagesResult = await pool.query(
             `SELECT m.id, m.content, m.created_at, u.id as sender_id, u.username as sender_username,
                     CASE WHEN m.sender_id = $2 THEN m.read_at ELSE NULL END as read_at
