@@ -142,6 +142,18 @@
             }
         });
         
+        socket.on('message read', (p) => {
+            perf.log('✓ Message read event: ' + p.messageId);
+            const el = document.querySelector('[data-message-id="' + p.messageId + '"]');
+            if (el) {
+                const readStatusEl = el.querySelector('.read-status');
+                if (readStatusEl) {
+                    readStatusEl.textContent = '✓✓';
+                    readStatusEl.style.color = 'var(--success-color)';
+                }
+            }
+        });
+        
         socket.on('user deleted', (p) => {
             const state = window.state || {};
             if (state.currentUser && state.currentUser.id === p.userId) {

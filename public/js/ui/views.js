@@ -12,6 +12,9 @@
         el.showMapBtn.classList.remove('active');
         el.showListBtn.classList.remove('active');
         
+        // Remove active from all nav buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        
         if (viewId.includes('map')) {
             el.showMapBtn.classList.add('active');
             setTimeout(() => {
@@ -24,6 +27,10 @@
             }, 100);
         } else if (viewId.includes('list')) {
             el.showListBtn.classList.add('active');
+        } else if (viewId.includes('settings')) {
+            // Add active class to settings button
+            const settingsBtn = document.querySelector('[data-view="settings-view"]');
+            if (settingsBtn) settingsBtn.classList.add('active');
         }
     }
 

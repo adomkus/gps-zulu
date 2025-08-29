@@ -454,9 +454,10 @@ apiRouter.get('/rooms/:roomId/messages', async (req, res) => {
             return res.status(403).json({ message: 'Jūs nepriklausote šiam pokalbių kambariui.' });
         }
         const messagesResult = await pool.query(
-            `SELECT m.id, m.content, m.created_at, u.id as sender_id, u.username as sender_username 
+            `SELECT m.id, m.content, m.created_at, u.id as sender_id, u.username as sender_username,
+                    CASE WHEN m.sender_id = $2 THEN m.read_at ELSE NULL END as read_at
              FROM messages m JOIN users u ON m.sender_id = u.id 
-             WHERE m.room_id = $1 ORDER BY m.created_at ASC`, [roomId]);
+             WHERE m.room_id = $1 ORDER BY m.created_at ASC`, [roomId, req.session.userId]);
         res.json(messagesResult.rows);
     } catch (err) {
         console.error("Klaida gaunant žinutes:", err);
@@ -771,6 +772,43 @@ io.on('connection', async (socket) => {
         } catch(err) { 
             log.error(`Klaida siunčiant žinutę:`, err);
             socket.emit('error', { message: 'Serverio klaida siunčiant žinutę.' });
+        }
+    });
+    
+    // Mark messages as read when user opens chat
+    socket.on('mark messages read', async ({ roomId }) => {
+        try {
+            // Verify room participation
+            const participationCheck = await pool.query(
+                "SELECT 1 FROM room_participants WHERE room_id = $1 AND user_id = $2", 
+                [roomId, userId]
+            );
+            
+            if (participationCheck.rowCount === 0) {
+                return;
+            }
+            
+            // Mark all unread messages in this room as read
+            await pool.query(
+                "UPDATE messages SET read_at = NOW() WHERE room_id = $1 AND sender_id != $2 AND read_at IS NULL", 
+                [roomId, userId]
+            );
+            
+            // Notify message sender about read status
+            const unreadMessages = await pool.query(
+                "SELECT id, sender_id FROM messages WHERE room_id = $1 AND sender_id != $2 AND read_at IS NULL", 
+                [roomId, userId]
+            );
+            
+            unreadMessages.rows.forEach(msg => {
+                const senderSocketId = onlineUsers.get(msg.sender_id)?.socketId;
+                if (senderSocketId) {
+                    io.to(senderSocketId).emit('message read', { messageId: msg.id });
+                }
+            });
+            
+        } catch(err) {
+            log.error(`Klaida pažymint žinutes kaip perskaitytas:`, err);
         }
     });
     

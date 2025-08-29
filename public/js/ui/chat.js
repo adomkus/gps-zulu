@@ -39,6 +39,11 @@
                 el.messagesList.appendChild(fragment);
                 el.messagesList.scrollTop = el.messagesList.scrollHeight;
                 perf.log(`✅ Užkrauta ${messages.length} žinučių`);
+                
+                // Mark messages as read
+                if (window.socket) {
+                    window.socket.emit('mark messages read', { roomId });
+                }
             })
             .catch(err => {
                 perf.log(`❌ Klaida užkraunant žinutes: ${err.message}`);
@@ -90,6 +95,41 @@
         contentEl.className = 'content';
         contentEl.textContent = message.content;
         msgEl.appendChild(contentEl);
+        
+        // Add timestamp
+        const timestampEl = document.createElement('div');
+        timestampEl.className = 'timestamp';
+        timestampEl.style.cssText = `
+            font-size: 11px;
+            color: var(--muted-text);
+            margin-top: 4px;
+            opacity: 0.7;
+        `;
+        
+        const messageTime = message.timestamp ? new Date(message.timestamp) : new Date();
+        timestampEl.textContent = messageTime.toLocaleString('lt-LT', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Add read status for sent messages
+        if (isSent) {
+            const readStatus = message.read_at ? '✓✓' : '✓';
+            const readStatusEl = document.createElement('span');
+            readStatusEl.className = 'read-status';
+            readStatusEl.textContent = readStatus;
+            readStatusEl.style.cssText = `
+                margin-left: 6px;
+                font-size: 12px;
+                color: ${message.read_at ? 'var(--success-color)' : 'var(--muted-text)'};
+            `;
+            timestampEl.appendChild(readStatusEl);
+        }
+        
+        msgEl.appendChild(timestampEl);
         
         // Admin functions - delete message
         if (window.state.currentUser.isAdmin) {
