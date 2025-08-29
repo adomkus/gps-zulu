@@ -453,88 +453,172 @@ apiRouter.get('/rooms/:roomId/messages', async (req, res) => {
         console.log(`📨 Fetching messages for room ${roomId}, user ${req.session.userId}`);
         
         // Ensure all required tables exist
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(255) UNIQUE NOT NULL,
-                password_hash VARCHAR(255) NOT NULL,
-                is_admin BOOLEAN DEFAULT FALSE,
-                is_approved BOOLEAN DEFAULT FALSE,
-                created_at TIMESTAMP DEFAULT NOW()
-            )
-        `);
+        try {
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    username VARCHAR(255) UNIQUE NOT NULL,
+                    password_hash VARCHAR(255) NOT NULL,
+                    is_admin BOOLEAN DEFAULT FALSE,
+                    is_approved BOOLEAN DEFAULT FALSE,
+                    created_at TIMESTAMP DEFAULT NOW()
+                )
+            `);
+            console.log("✅ Users table ensured");
+        } catch (err) {
+            console.error("❌ Error creating users table:", err.message);
+        }
         
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS rooms (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT NOW()
-            )
-        `);
+        try {
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS rooms (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    created_at TIMESTAMP DEFAULT NOW()
+                )
+            `);
+            console.log("✅ Rooms table ensured");
+        } catch (err) {
+            console.error("❌ Error creating rooms table:", err.message);
+        }
         
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS messages (
-                id SERIAL PRIMARY KEY,
-                room_id INTEGER NOT NULL,
-                sender_id INTEGER NOT NULL,
-                content TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT NOW(),
-                read_at TIMESTAMP NULL
-            )
-        `);
+        try {
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS messages (
+                    id SERIAL PRIMARY KEY,
+                    room_id INTEGER NOT NULL,
+                    sender_id INTEGER NOT NULL,
+                    content TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT NOW(),
+                    read_at TIMESTAMP NULL
+                )
+            `);
+            console.log("✅ Messages table ensured");
+        } catch (err) {
+            console.error("❌ Error creating messages table:", err.message);
+        }
         
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS room_participants (
-                id SERIAL PRIMARY KEY,
-                room_id INTEGER NOT NULL,
-                user_id INTEGER NOT NULL,
-                created_at TIMESTAMP DEFAULT NOW(),
-                UNIQUE(room_id, user_id)
-            )
-        `);
+        // Ensure read_at column exists in existing messages table
+        try {
+            await pool.query("ALTER TABLE messages ADD COLUMN IF NOT EXISTS read_at TIMESTAMP NULL");
+            console.log("✅ read_at column ensured in messages table");
+        } catch (err) {
+            console.log("ℹ️ read_at column already exists or error:", err.message);
+        }
+        
+        try {
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS room_participants (
+                    id SERIAL PRIMARY KEY,
+                    room_id INTEGER NOT NULL,
+                    user_id INTEGER NOT NULL,
+                    created_at TIMESTAMP DEFAULT NOW(),
+                    UNIQUE(room_id, user_id)
+                )
+            `);
+            console.log("✅ Room participants table ensured");
+        } catch (err) {
+            console.error("❌ Error creating room_participants table:", err.message);
+        }
         
         // Check if user exists in database
-        let userResult = await pool.query("SELECT id, username FROM users WHERE id = $1", [req.session.userId]);
-        if (userResult.rowCount === 0) {
-            console.log(`Creating user ${req.session.userId} (${req.session.username})`);
-            const bcrypt = require('bcrypt');
-            const hashedPassword = await bcrypt.hash('temp123', 10);
-            await pool.query(
-                "INSERT INTO users (id, username, password_hash, is_admin, is_approved) VALUES ($1, $2, $3, $4, $5)",
-                [req.session.userId, req.session.username || 'user_' + req.session.userId, hashedPassword, false, true]
-            );
+        let userResult;
+        try {
+            userResult = await pool.query("SELECT id, username FROM users WHERE id = $1", [req.session.userId]);
+            if (userResult.rowCount === 0) {
+                console.log(`Creating user ${req.session.userId} (${req.session.username})`);
+                const bcrypt = require('bcrypt');
+                const hashedPassword = await bcrypt.hash('temp123', 10);
+                await pool.query(
+                    "INSERT INTO users (id, username, password_hash, is_admin, is_approved) VALUES ($1, $2, $3, $4, $5)",
+                    [req.session.userId, req.session.username || 'user_' + req.session.userId, hashedPassword, false, true]
+                );
+                console.log(`✅ User ${req.session.userId} created successfully`);
+            }
+        } catch (err) {
+            console.error("❌ Error checking/creating user:", err.message);
+            return res.status(500).json({ message: 'Klaida su vartotojo duomenimis: ' + err.message });
         }
         
         // Ensure room exists
-        await pool.query("INSERT INTO rooms (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING", [roomId, `Room ${roomId}`]);
+        try {
+            await pool.query("INSERT INTO rooms (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING", [roomId, `Room ${roomId}`]);
+            console.log(`✅ Room ${roomId} ensured`);
+        } catch (err) {
+            console.error("❌ Error ensuring room:", err.message);
+            return res.status(500).json({ message: 'Klaida su kambario duomenimis: ' + err.message });
+        }
         
         // Ensure user is participant
-        await pool.query("INSERT INTO room_participants (room_id, user_id) VALUES ($1, $2) ON CONFLICT (room_id, user_id) DO NOTHING", [roomId, req.session.userId]);
+        try {
+            await pool.query("INSERT INTO room_participants (room_id, user_id) VALUES ($1, $2) ON CONFLICT (room_id, user_id) DO NOTHING", [roomId, req.session.userId]);
+            console.log(`✅ User ${req.session.userId} added to room ${roomId}`);
+        } catch (err) {
+            console.error("❌ Error adding user to room:", err.message);
+            return res.status(500).json({ message: 'Klaida pridedant vartotoją prie kambario: ' + err.message });
+        }
         
-        // Fetch messages
-        const messagesResult = await pool.query(
-            `SELECT m.id, m.content, m.created_at, u.id as sender_id, u.username as sender_username,
-                    CASE WHEN m.sender_id = $2 THEN m.read_at ELSE NULL END as read_at
-             FROM messages m JOIN users u ON m.sender_id = u.id 
-             WHERE m.room_id = $1 ORDER BY m.created_at ASC`, [roomId, req.session.userId]);
+        // Fetch messages with safe read_at handling
+        let messagesResult;
+        try {
+            messagesResult = await pool.query(
+                `SELECT m.id, m.content, m.created_at, u.id as sender_id, u.username as sender_username,
+                        CASE WHEN m.sender_id = $2 THEN m.read_at ELSE NULL END as read_at
+                 FROM messages m JOIN users u ON m.sender_id = u.id 
+                 WHERE m.room_id = $1 ORDER BY m.created_at ASC`, [roomId, req.session.userId]);
+        } catch (err) {
+            if (err.message.includes('read_at')) {
+                console.log("🔄 read_at column not available, fetching without it");
+                messagesResult = await pool.query(
+                    `SELECT m.id, m.content, m.created_at, u.id as sender_id, u.username as sender_username,
+                            NULL as read_at
+                     FROM messages m JOIN users u ON m.sender_id = u.id 
+                     WHERE m.room_id = $1 ORDER BY m.created_at ASC`, [roomId]);
+            } else {
+                console.error("❌ Error fetching messages:", err.message);
+                return res.status(500).json({ message: 'Klaida užkraunant žinutes: ' + err.message });
+            }
+        }
         
         console.log(`✅ Found ${messagesResult.rows.length} messages for room ${roomId}`);
         
         // If no messages exist, create a welcome message
         if (messagesResult.rows.length === 0) {
             console.log(`Creating welcome message for room ${roomId}`);
-            await pool.query(
-                "INSERT INTO messages (room_id, sender_id, content) VALUES ($1, $2, $3)",
-                [roomId, req.session.userId, "Sveiki! Pokalbis pradėtas 🎉"]
-            );
+            try {
+                await pool.query(
+                    "INSERT INTO messages (room_id, sender_id, content) VALUES ($1, $2, $3)",
+                    [roomId, req.session.userId, "Sveiki! Pokalbis pradėtas 🎉"]
+                );
+                console.log(`✅ Welcome message created for room ${roomId}`);
+            } catch (err) {
+                console.error("❌ Error creating welcome message:", err.message);
+                // Continue without welcome message
+            }
             
-            // Fetch messages again
-            const updatedResult = await pool.query(
-                `SELECT m.id, m.content, m.created_at, u.id as sender_id, u.username as sender_username,
-                        CASE WHEN m.sender_id = $2 THEN m.read_at ELSE NULL END as read_at
-                 FROM messages m JOIN users u ON m.sender_id = u.id 
-                 WHERE m.room_id = $1 ORDER BY m.created_at ASC`, [roomId, req.session.userId]);
+            // Fetch messages again with safe read_at handling
+            let updatedResult;
+            try {
+                updatedResult = await pool.query(
+                    `SELECT m.id, m.content, m.created_at, u.id as sender_id, u.username as sender_username,
+                            CASE WHEN m.sender_id = $2 THEN m.read_at ELSE NULL END as read_at
+                     FROM messages m JOIN users u ON m.sender_id = u.id 
+                     WHERE m.room_id = $1 ORDER BY m.created_at ASC`, [roomId, req.session.userId]);
+            } catch (err) {
+                if (err.message.includes('read_at')) {
+                    console.log("🔄 read_at column not available, fetching without it");
+                    updatedResult = await pool.query(
+                        `SELECT m.id, m.content, m.created_at, u.id as sender_id, u.username as sender_username,
+                                NULL as read_at
+                         FROM messages m JOIN users u ON m.sender_id = u.id 
+                         WHERE m.room_id = $1 ORDER BY m.created_at ASC`, [roomId]);
+                } else {
+                    console.error("❌ Error fetching updated messages:", err.message);
+                    return res.json([]);
+                }
+            }
             
+            console.log(`✅ Returning ${updatedResult.rows.length} updated messages`);
             return res.json(updatedResult.rows);
         }
         
@@ -869,24 +953,32 @@ io.on('connection', async (socket) => {
                 return;
             }
             
-            // Mark all unread messages in this room as read
-            await pool.query(
-                "UPDATE messages SET read_at = NOW() WHERE room_id = $1 AND sender_id != $2 AND read_at IS NULL", 
-                [roomId, userId]
-            );
-            
-            // Notify message sender about read status
-            const unreadMessages = await pool.query(
-                "SELECT id, sender_id FROM messages WHERE room_id = $1 AND sender_id != $2 AND read_at IS NULL", 
-                [roomId, userId]
-            );
-            
-            unreadMessages.rows.forEach(msg => {
-                const senderSocketId = onlineUsers.get(msg.sender_id)?.socketId;
-                if (senderSocketId) {
-                    io.to(senderSocketId).emit('message read', { messageId: msg.id });
+            // Mark all unread messages in this room as read (with safe read_at handling)
+            try {
+                await pool.query(
+                    "UPDATE messages SET read_at = NOW() WHERE room_id = $1 AND sender_id != $2 AND read_at IS NULL", 
+                    [roomId, userId]
+                );
+                
+                // Notify message sender about read status
+                const unreadMessages = await pool.query(
+                    "SELECT id, sender_id FROM messages WHERE room_id = $1 AND sender_id != $2 AND read_at IS NULL", 
+                    [roomId, userId]
+                );
+                
+                unreadMessages.rows.forEach(msg => {
+                    const senderSocketId = onlineUsers.get(msg.sender_id)?.socketId;
+                    if (senderSocketId) {
+                        io.to(senderSocketId).emit('message read', { messageId: msg.id });
+                    }
+                });
+            } catch (err) {
+                if (err.message.includes('read_at')) {
+                    console.log("ℹ️ read_at column not available, skipping read status update");
+                } else {
+                    throw err;
                 }
-            });
+            }
             
         } catch(err) {
             log.error(`Klaida pažymint žinutes kaip perskaitytas:`, err);
