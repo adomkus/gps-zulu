@@ -28,10 +28,10 @@
         addSystemMessage(`💬 Pokalbis "${roomName}" atidarytas!`);
         
         // Load messages
-        perf.log(`🔄 Kraunamos žinutės iš /rooms/${roomId}/messages`);
+        perf.log(`💬 Kraunamos žinutės kambariui ${roomId}`);
         window.Api.fetch(`/rooms/${roomId}/messages`)
             .then(messages => {
-                perf.log(`📥 Gautos žinutės:`, messages);
+                perf.log(`📨 Gauta ${messages.length} žinučių`);
                 el.messagesList.innerHTML = '';
                 const fragment = document.createDocumentFragment();
                 messages.forEach(msg => {
@@ -40,16 +40,20 @@
                 });
                 el.messagesList.appendChild(fragment);
                 el.messagesList.scrollTop = el.messagesList.scrollHeight;
-                perf.log(`✅ Užkrauta ${messages.length} žinučių`);
                 
                 // Mark messages as read
                 if (window.socket) {
                     window.socket.emit('mark messages read', { roomId });
                 }
+                
+                // If no messages, show helpful message
+                if (messages.length === 0) {
+                    addSystemMessage('👋 Čia prasideda jūsų pokalbis!');
+                }
             })
             .catch(err => {
                 perf.log(`❌ Klaida užkraunant žinutes:`, err);
-                addSystemMessage(`⚠️ Klaida kraunant žinutes: ${err.message}`);
+                addSystemMessage(`⚠️ Nepavyko užkrauti žinučių. Bandykite dar kartą.`);
             });
     }
 
@@ -108,11 +112,10 @@
             opacity: 0.7;
         `;
         
-        const messageTime = message.timestamp ? new Date(message.timestamp) : new Date();
+        const messageTime = message.created_at ? new Date(message.created_at) : new Date();
         timestampEl.textContent = messageTime.toLocaleString('lt-LT', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
         });
