@@ -910,29 +910,36 @@ io.on('connection', async (socket) => {
                 return;
             }
             
-            const res = await pool.query(
-                "INSERT INTO messages (sender_id, room_id, content) VALUES ($1, $2, $3) RETURNING id, created_at", 
-                [userId, roomId, sanitizedContent]
+            // Išsaugome žinutę DB
+            const result = await pool.query(
+                "INSERT INTO messages (room_id, sender_id, content) VALUES ($1, $2, $3) RETURNING id, created_at",
+                [roomId, userId, content]
             );
-            
-            const newMessage = { 
-                id: res.rows[0].id, 
-                room_id: Number(roomId), 
-                content: sanitizedContent, 
-                created_at: res.rows[0].created_at, 
-                sender_id: userId, 
-                sender_username: username 
+            const newMessage = {
+                id: result.rows[0].id,
+                room_id: parseInt(roomId),
+                sender_id: userId,
+                content: content,
+                created_at: result.rows[0].created_at,
+                sender_username: username,
+                read_at: null
             };
-            
-            const participantRes = await pool.query("SELECT user_id FROM room_participants WHERE room_id = $1", [roomId]);
-            participantRes.rows.forEach(row => {
-                const targetSocketId = onlineUsers.get(row.user_id)?.socketId;
-                if(targetSocketId) {
-                    io.to(targetSocketId).emit('new message', newMessage);
+
+            // Gauti visus kambario dalyvius
+            const participantsResult = await pool.query(
+                "SELECT user_id FROM room_participants WHERE room_id = $1",
+                [roomId]
+            );
+
+            // Išsiųsti žinutę kiekvienam dalyviui, kuris yra prisijungęs
+            participantsResult.rows.forEach(participant => {
+                const userSocket = onlineUsers.get(participant.user_id);
+                if (userSocket && userSocket.socketId) {
+                    io.to(userSocket.socketId).emit('new message', newMessage);
                 }
             });
-            
-            log.info(`Žinutė išsiųsta: ${username} → kambarys ${roomId}`);
+
+            log.info(`Žinutė išsaugota ir išsiųsta ${participantsResult.rows.length} dalyviams kambaryje ${roomId}`);
 
         } catch(err) { 
             log.error(`Klaida siunčiant žinutę:`, err);

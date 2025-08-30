@@ -66,112 +66,48 @@
     // === MESSAGE CREATION ===
     function createMessageElement(message) {
         const msgEl = document.createElement('div');
-        
-        // System messages
-        if (message.isSystem) {
-            msgEl.className = 'message system';
-            msgEl.style.cssText = `
-                text-align: center;
-                background: rgba(0, 123, 255, 0.1);
-                border: 1px solid rgba(0, 123, 255, 0.3);
-                border-radius: 8px;
-                padding: 8px 12px;
-                margin: 8px 16px;
-                font-style: italic;
-                color: var(--primary-color);
-                font-size: 14px;
-            `;
-            msgEl.textContent = message.content;
-            return msgEl;
-        }
-        
-        // Normal messages
         const isSent = message.sender_id === window.state.currentUser.id;
         msgEl.className = `message ${isSent ? 'sent' : 'received'}`;
         msgEl.dataset.messageId = message.id;
-        
+
+        // Pridedame siuntėjo vardą, jei tai gauta žinutė
         if (!isSent) {
-            const senderEl = document.createElement('div');
-            senderEl.className = 'sender';
-            senderEl.textContent = message.sender_username;
-            msgEl.appendChild(senderEl);
+            const senderNameEl = document.createElement('div');
+            senderNameEl.className = 'sender-name';
+            senderNameEl.textContent = message.sender_username;
+            msgEl.appendChild(senderNameEl);
         }
-        
+
         const contentEl = document.createElement('div');
         contentEl.className = 'content';
         contentEl.textContent = message.content;
         msgEl.appendChild(contentEl);
-        
-        // Add timestamp
+
+        // Pridedame laiką ir perskaitymo statusą
         const timestampEl = document.createElement('div');
         timestampEl.className = 'timestamp';
-        timestampEl.style.cssText = `
-            font-size: 11px;
-            color: var(--muted-text);
-            margin-top: 4px;
-            opacity: 0.7;
-        `;
         
         const messageTime = message.created_at ? new Date(message.created_at) : new Date();
-        timestampEl.textContent = messageTime.toLocaleString('lt-LT', {
-            month: 'short',
-            day: 'numeric',
+        const timeString = messageTime.toLocaleString('lt-LT', {
             hour: '2-digit',
             minute: '2-digit'
         });
-        
-        // Add read status for sent messages
+
+        timestampEl.textContent = timeString;
+
         if (isSent) {
             const readStatus = message.read_at ? '✓✓' : '✓';
             const readStatusEl = document.createElement('span');
             readStatusEl.className = 'read-status';
             readStatusEl.textContent = readStatus;
-            readStatusEl.style.cssText = `
-                margin-left: 6px;
-                font-size: 12px;
-                color: ${message.read_at ? 'var(--success-color)' : 'var(--muted-text)'};
-            `;
+            if (message.read_at) {
+                readStatusEl.style.color = 'var(--info-color)';
+            }
             timestampEl.appendChild(readStatusEl);
         }
-        
+
         msgEl.appendChild(timestampEl);
-        
-        // Admin functions - delete message
-        if (window.state.currentUser.isAdmin) {
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'message-delete-btn';
-            deleteBtn.innerHTML = '🗑️';
-            deleteBtn.title = 'Ištrinti žinutę';
-            deleteBtn.style.cssText = `
-                position: absolute;
-                top: 5px;
-                right: 5px;
-                background: rgba(220, 53, 69, 0.8);
-                color: white;
-                border: none;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                font-size: 12px;
-                cursor: pointer;
-                opacity: 0;
-                transition: opacity 0.2s;
-            `;
-            
-            deleteBtn.onclick = (e) => {
-                e.stopPropagation();
-                if (confirm(`Ar tikrai norite ištrinti šią žinutę?`)) {
-                    deleteMessage(message.id);
-                }
-            };
-            
-            msgEl.appendChild(deleteBtn);
-            
-            // Show delete button on hover
-            msgEl.onmouseenter = () => deleteBtn.style.opacity = '1';
-            msgEl.onmouseleave = () => deleteBtn.style.opacity = '0';
-        }
-        
+
         return msgEl;
     }
 
@@ -183,13 +119,11 @@
     }
 
     function addSystemMessage(text) {
-        const systemMessage = {
-            content: text,
-            username: 'Sistema',
-            timestamp: new Date().toISOString(),
-            isSystem: true
-        };
-        addMessageToUI(systemMessage);
+        const msgElement = document.createElement('div');
+        msgElement.className = 'system-message';
+        msgElement.textContent = text;
+        window.el.messagesList.appendChild(msgElement);
+        window.el.messagesList.scrollTop = window.el.messagesList.scrollHeight;
     }
 
     // === MESSAGE ACTIONS ===
