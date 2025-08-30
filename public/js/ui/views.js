@@ -24,7 +24,7 @@
         }
 
         // Special handling for map view
-        if (viewId === 'map-view' && window.map) {
+        if (viewId === 'map-view' && window.map && typeof window.map.invalidateSize === 'function') {
             setTimeout(() => window.map.invalidateSize(), 100);
         }
     }

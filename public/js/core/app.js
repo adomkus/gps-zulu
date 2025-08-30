@@ -54,11 +54,15 @@
         if (window.EventListeners && window.EventListeners.setupAppEventListeners) {
             window.EventListeners.setupAppEventListeners();
         }
-        if (window.UIModule) window.UIModule.switchView('users-list-view');
+        if (window.UIModule) window.UIModule.switchView('users-view');
         
         // Load initial data
         try {
             const data = await window.Api.fetch('/initial-data');
+            if (data.currentUser) {
+                window.state.currentUser = data.currentUser;
+                perf.log(`👤 Current user: ${data.currentUser.username} (ID: ${data.currentUser.id})`);
+            }
             if (data.allUsers) {
                 window.state.allUsers = new Map(data.allUsers.map(u => [u.id, u]));
                 perf.log(`📊 Loaded ${data.allUsers.length} total users`);
@@ -67,6 +71,12 @@
                 window.state.allUsers = new Map();
             }
             if (window.UIModule) window.UIModule.renderUsers(data.onlineUsers || []);
+            
+            // Initialize general chat
+            if (window.Chat && window.Chat.setupGeneralChat) {
+                window.Chat.setupGeneralChat();
+            }
+            
             perf.log('Pradinis duomenų užkrovimas baigtas');
         } catch (err) {
             perf.log(`Klaida gaunant pradinius duomenis: ${err.message}`);

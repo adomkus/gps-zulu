@@ -436,6 +436,11 @@ apiRouter.get('/initial-data', async (req, res) => {
         }
         
         res.json({ 
+            currentUser: {
+                id: req.session.userId,
+                username: req.session.username,
+                isAdmin: req.session.isAdmin
+            },
             onlineUsers: onlineUsersList, 
             allUsers: allUsersList,
             serverTime: new Date().toISOString() // Pridėtas serverio laikas
@@ -893,8 +898,8 @@ io.on('connection', async (socket) => {
                             const existingRoomRes = await pool.query(
                 `SELECT rp1.room_id FROM room_participants rp1 
                  JOIN room_participants rp2 ON rp1.room_id = rp2.room_id 
-                 JOIN rooms cr ON cr.id = rp1.room_id 
-                 WHERE rp1.user_id = $1 AND rp2.user_id = $2 AND cr.is_public = FALSE`, [userId, targetUserId]);
+                 JOIN rooms r ON r.id = rp1.room_id 
+                 WHERE rp1.user_id = $1 AND rp2.user_id = $2 AND r.is_public = FALSE`, [userId, targetUserId]);
             
             let roomId;
             if (existingRoomRes.rows.length > 0) {
