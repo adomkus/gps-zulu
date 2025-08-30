@@ -253,6 +253,9 @@
         });
         el.showGeneralChatBtn.addEventListener('click', () => {
             Views.switchSecondaryView('general-chat-sub-view');
+            if (window.Chat && window.Chat.setupGeneralChat) {
+                window.Chat.setupGeneralChat();
+            }
         });
         el.showMyChatsBtn.addEventListener('click', () => {
             Views.switchSecondaryView('my-chats-sub-view');

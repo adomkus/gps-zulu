@@ -60,23 +60,24 @@ window.SettingsModule = (function() {
         }
 
         // Update UI elements if they exist
-        if (window.el && window.el.soundToggle) {
-            window.el.soundToggle.checked = settings.sound;
+        if (window.el && window.el.settingsSound) {
+            window.el.settingsSound.checked = settings.sound;
         }
-        if (window.el && window.el.vibrateToggle) {
-            window.el.vibrateToggle.checked = settings.vibrate;
+        if (window.el && window.el.settingsVibrate) {
+            window.el.settingsVibrate.checked = settings.vibrate;
         }
-        if (window.el && window.el.backgroundLocationToggle) {
-            window.el.backgroundLocationToggle.checked = settings.backgroundLocation;
+        if (window.el && window.el.settingsBackgroundLocation) {
+            window.el.settingsBackgroundLocation.checked = settings.backgroundLocation;
         }
-        if (window.el && window.el.backgroundNotificationsToggle) {
-            window.el.backgroundNotificationsToggle.checked = settings.backgroundNotifications;
+        if (window.el && window.el.settingsBackgroundNotifications) {
+            window.el.settingsBackgroundNotifications.checked = settings.backgroundNotifications;
         }
-        if (window.el && window.el.themeToggle) {
-            window.el.themeToggle.checked = settings.theme === 'dark';
+        if (window.el && window.el.settingsTheme) {
+            window.el.settingsTheme.value = settings.theme;
         }
-        const colorSel = document.getElementById('marker-color');
-        if (colorSel) colorSel.value = settings.markerColor || 'red';
+        if (window.el && window.el.markerColor) {
+            window.el.markerColor.value = settings.markerColor || 'red';
+        }
     }
 
     /**
@@ -86,24 +87,24 @@ window.SettingsModule = (function() {
         if (!window.el) return;
 
         // Sound setting
-        if (window.el.soundToggle) {
-            window.el.soundToggle.addEventListener('change', function() {
+        if (window.el.settingsSound) {
+            window.el.settingsSound.addEventListener('change', function() {
                 currentSettings.sound = this.checked;
                 saveSettings(currentSettings);
             });
         }
 
         // Vibration setting
-        if (window.el.vibrateToggle) {
-            window.el.vibrateToggle.addEventListener('change', function() {
+        if (window.el.settingsVibrate) {
+            window.el.settingsVibrate.addEventListener('change', function() {
                 currentSettings.vibrate = this.checked;
                 saveSettings(currentSettings);
             });
         }
 
         // Background location setting
-        if (window.el.backgroundLocationToggle) {
-            window.el.backgroundLocationToggle.addEventListener('change', function() {
+        if (window.el.settingsBackgroundLocation) {
+            window.el.settingsBackgroundLocation.addEventListener('change', function() {
                 currentSettings.backgroundLocation = this.checked;
                 saveSettings(currentSettings);
                 
@@ -117,24 +118,25 @@ window.SettingsModule = (function() {
         }
 
         // Background notifications setting
-        if (window.el.backgroundNotificationsToggle) {
-            window.el.backgroundNotificationsToggle.addEventListener('change', function() {
+        if (window.el.settingsBackgroundNotifications) {
+            window.el.settingsBackgroundNotifications.addEventListener('change', function() {
                 currentSettings.backgroundNotifications = this.checked;
                 saveSettings(currentSettings);
             });
         }
 
         // Theme setting
-        if (window.el.themeToggle) {
-            window.el.themeToggle.addEventListener('change', function() {
-                currentSettings.theme = this.checked ? 'dark' : 'light';
+        if (window.el.settingsTheme) {
+            window.el.settingsTheme.addEventListener('change', function() {
+                currentSettings.theme = this.value;
                 saveSettings(currentSettings);
                 applySettings(currentSettings);
             });
         }
-        const colorSel2 = document.getElementById('marker-color');
-        if (colorSel2) {
-            colorSel2.addEventListener('change', function() {
+
+        // Marker color setting
+        if (window.el.markerColor) {
+            window.el.markerColor.addEventListener('change', function() {
                 currentSettings.markerColor = this.value || 'red';
                 saveSettings(currentSettings);
                 if (window.MapModule && window.MapModule.renderMapMarkers) {

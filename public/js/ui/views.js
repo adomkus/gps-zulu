@@ -50,7 +50,7 @@
     }
 
     function renderMyChats() {
-        const myChatsView = document.getElementById('my-chats-view');
+        const myChatsView = document.getElementById('my-chats-sub-view');
         myChatsView.innerHTML = '<div class="placeholder">Kraunami pokalbiai...</div>';
 
         Api.fetch('/api/my-chats')
@@ -256,10 +256,13 @@
     // === EXPORT ===
     window.UIModule = {
         switchView: switchView,
+        switchSecondaryView: switchSecondaryView,
         renderUsers: renderUsers,
+        renderMyChats: renderMyChats,
         handleMapPopupAction: handleMapPopupAction
     };
     
     // Global alias for backward compatibility
+    window.Views = window.UIModule;
     window.handleMapPopupAction = handleMapPopupAction;
 })();

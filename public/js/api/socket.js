@@ -112,15 +112,26 @@
         
         socket.on('new message', (message) => {
             const state = window.state || {};
+            
+            // Handle private chat messages
             if (state.activeChat && state.activeChat.roomId === message.room_id) {
                 if (window.MessagesModule && window.MessagesModule.addMessageToUI) {
                     window.MessagesModule.addMessageToUI(message);
                 }
             }
             
+            // Handle general chat messages (room ID 1)
+            if (message.room_id === 1) {
+                if (window.MessagesModule && window.MessagesModule.addGeneralChatMessageToUI) {
+                    window.MessagesModule.addGeneralChatMessageToUI(message);
+                }
+            }
+            
             if (message.sender_id !== (state.currentUser && state.currentUser.id)) {
                 const isCurrent = state.activeChat && state.activeChat.roomId === message.room_id;
-                if (!state.isAppVisible || !isCurrent) {
+                const isGeneralChat = message.room_id === 1;
+                
+                if (!state.isAppVisible || (!isCurrent && !isGeneralChat)) {
                     if (window.notificationManager) {
                         window.notificationManager.showNotification(
                             'Nauja žinutė nuo ' + (message.sender_username || 'Nezinomas'),

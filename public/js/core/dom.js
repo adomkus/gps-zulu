@@ -66,7 +66,17 @@
             
             // Connection elements
             connectionDetails: document.getElementById('connection-details'),
-            connectionIndicator: document.getElementById('connection-indicator')
+            connectionIndicator: document.getElementById('connection-indicator'),
+
+            // Settings
+            settingsSound: document.getElementById('settings-sound'),
+            settingsVibrate: document.getElementById('settings-vibrate'),
+            settingsBackgroundLocation: document.getElementById('settings-background-location'),
+            settingsBackgroundNotifications: document.getElementById('settings-background-notifications'),
+            settingsTheme: document.getElementById('settings-theme'),
+            markerColor: document.getElementById('marker-color'),
+
+            // Chat
         };
     }
 

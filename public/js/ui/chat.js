@@ -106,6 +106,68 @@
         window.el.messagesList.scrollTop = window.el.messagesList.scrollHeight;
     }
 
+    // === GENERAL CHAT FUNCTIONALITY ===
+    function setupGeneralChat() {
+        const generalChatForm = document.getElementById('general-chat-form');
+        const generalChatInput = document.getElementById('general-chat-input');
+        const generalChatMessages = document.getElementById('general-chat-messages');
+
+        if (generalChatForm) {
+            generalChatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const message = generalChatInput.value.trim();
+                if (message) {
+                    sendGeneralChatMessage(message);
+                    generalChatInput.value = '';
+                }
+            });
+        }
+
+        // Load general chat messages
+        loadGeneralChatMessages();
+    }
+
+    function loadGeneralChatMessages() {
+        const generalChatMessages = document.getElementById('general-chat-messages');
+        if (!generalChatMessages) return;
+
+        generalChatMessages.innerHTML = '<div class="system-message">Kraunamos žinutės...</div>';
+
+        window.Api.fetch('/api/rooms/1/messages')
+            .then(messages => {
+                generalChatMessages.innerHTML = '';
+                messages.forEach(addGeneralChatMessageToUI);
+                generalChatMessages.scrollTop = generalChatMessages.scrollHeight;
+            })
+            .catch(err => {
+                generalChatMessages.innerHTML = `<div class="system-message error">Klaida kraunant žinutes: ${err.message}</div>`;
+            });
+    }
+
+    function sendGeneralChatMessage(content) {
+        if (window.socket && window.socket.connected) {
+            window.socket.emit('send message', {
+                roomId: 1,
+                content: content
+            });
+        } else {
+            alert('Nėra ryšio su serveriu. Bandykite perkrauti puslapį.');
+        }
+    }
+
+    function addGeneralChatMessageToUI(message) {
+        const generalChatMessages = document.getElementById('general-chat-messages');
+        if (!generalChatMessages) return;
+
+        const msgElement = createMessageElement(message);
+        generalChatMessages.appendChild(msgElement);
+        
+        // Automatiškai slinkti į apačią, jei esame arti apačios
+        if (generalChatMessages.scrollHeight - generalChatMessages.scrollTop < generalChatMessages.clientHeight + 100) {
+            generalChatMessages.scrollTop = generalChatMessages.scrollHeight;
+        }
+    }
+
     // === MESSAGE ACTIONS ===
     async function deleteMessage(messageId) {
         try {
@@ -134,10 +196,15 @@
         createMessageElement: createMessageElement,
         addMessageToUI: addMessageToUI,
         addSystemMessage: addSystemMessage,
-        deleteMessage: deleteMessage
+        deleteMessage: deleteMessage,
+        setupGeneralChat: setupGeneralChat,
+        loadGeneralChatMessages: loadGeneralChatMessages,
+        sendGeneralChatMessage: sendGeneralChatMessage,
+        addGeneralChatMessageToUI: addGeneralChatMessageToUI
     };
     
     // Global aliases for backward compatibility
+    window.Chat = window.MessagesModule;
     window.showChat = showChat;
     window.hideChat = hideChat;
 })();

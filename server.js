@@ -475,6 +475,7 @@ apiRouter.get('/rooms/:roomId/messages', async (req, res) => {
                 CREATE TABLE IF NOT EXISTS rooms (
                     id SERIAL PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
+                    is_public BOOLEAN DEFAULT FALSE,
                     created_at TIMESTAMP DEFAULT NOW()
                 )
             `);
@@ -505,6 +506,14 @@ apiRouter.get('/rooms/:roomId/messages', async (req, res) => {
             console.log("✅ read_at column ensured in messages table");
         } catch (err) {
             console.log("ℹ️ read_at column already exists or error:", err.message);
+        }
+        
+        // Ensure is_public column exists in existing rooms table
+        try {
+            await pool.query("ALTER TABLE rooms ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT FALSE");
+            console.log("✅ is_public column ensured in rooms table");
+        } catch (err) {
+            console.log("ℹ️ is_public column already exists or error:", err.message);
         }
         
         try {
@@ -543,7 +552,13 @@ apiRouter.get('/rooms/:roomId/messages', async (req, res) => {
         
         // Ensure room exists
         try {
-            await pool.query("INSERT INTO rooms (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING", [roomId, `Room ${roomId}`]);
+            if (roomId == 1) {
+                // General chat room
+                await pool.query("INSERT INTO rooms (id, name, is_public) VALUES ($1, $2, TRUE) ON CONFLICT (id) DO NOTHING", [roomId, 'Bendras čatas']);
+            } else {
+                // Private chat room
+                await pool.query("INSERT INTO rooms (id, name, is_public) VALUES ($1, $2, FALSE) ON CONFLICT (id) DO NOTHING", [roomId, `Room ${roomId}`]);
+            }
             console.log(`✅ Room ${roomId} ensured`);
         } catch (err) {
             console.error("❌ Error ensuring room:", err.message);
@@ -851,6 +866,19 @@ io.on('connection', async (socket) => {
     
     io.emit('online users update', Array.from(onlineUsers.values()));
     
+    // Automatically add user to general chat room
+    try {
+        // Ensure general chat room exists
+        await pool.query("INSERT INTO rooms (id, name, is_public) VALUES ($1, $2, TRUE) ON CONFLICT (id) DO NOTHING", [GENERAL_CHAT_ROOM_ID, 'Bendras čatas']);
+        
+        // Add user to general chat room if not already there
+        await pool.query("INSERT INTO room_participants (room_id, user_id) VALUES ($1, $2) ON CONFLICT (room_id, user_id) DO NOTHING", [GENERAL_CHAT_ROOM_ID, userId]);
+        
+        log.info(`✅ User ${username} (${userId}) automatically added to general chat room ${GENERAL_CHAT_ROOM_ID}`);
+    } catch (err) {
+        log.error(`❌ Error adding user ${userId} to general chat:`, err);
+    }
+    
     socket.on('initiate private chat', async (targetUserId) => {
         log.info(`🚀 Initiate private chat request: user ${userId} -> user ${targetUserId}`);
         log.info(`📊 Socket info: id=${socket.id}, connected=${socket.connected}, userId=${userId}`);
@@ -862,10 +890,10 @@ io.on('connection', async (socket) => {
         
         try {
             log.info(`🔍 Checking for existing private room between ${userId} and ${targetUserId}`);
-            const existingRoomRes = await pool.query(
+                            const existingRoomRes = await pool.query(
                 `SELECT rp1.room_id FROM room_participants rp1 
                  JOIN room_participants rp2 ON rp1.room_id = rp2.room_id 
-                 JOIN chat_rooms cr ON cr.id = rp1.room_id 
+                 JOIN rooms cr ON cr.id = rp1.room_id 
                  WHERE rp1.user_id = $1 AND rp2.user_id = $2 AND cr.is_public = FALSE`, [userId, targetUserId]);
             
             let roomId;
@@ -874,7 +902,7 @@ io.on('connection', async (socket) => {
                 log.info(`✅ Found existing room: ${roomId}`);
             } else {
                 log.info(`📝 Creating new private room`);
-                const newRoomRes = await pool.query("INSERT INTO chat_rooms (is_public) VALUES (FALSE) RETURNING id");
+                const newRoomRes = await pool.query("INSERT INTO rooms (is_public) VALUES (FALSE) RETURNING id");
                 roomId = newRoomRes.rows[0].id;
                 await pool.query("INSERT INTO room_participants (room_id, user_id) VALUES ($1, $2), ($1, $3)", [roomId, userId, targetUserId]);
                 log.info(`✅ Created new room: ${roomId}`);

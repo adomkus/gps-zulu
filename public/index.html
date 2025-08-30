@@ -123,7 +123,43 @@
                 <div id="map"></div>
             </div>
             <div id="settings-view" class="view">
-                <!-- Settings content here -->
+                <div class="settings-container">
+                    <h2>Nustatymai</h2>
+                    <div class="setting-item">
+                        <label for="settings-sound">Garsinis pranešimas</label>
+                        <input type="checkbox" id="settings-sound">
+                    </div>
+                    <div class="setting-item">
+                        <label for="settings-vibrate">Vibracinis pranešimas</label>
+                        <input type="checkbox" id="settings-vibrate">
+                    </div>
+                    <div class="setting-item">
+                        <label for="settings-background-location">Vietovės sekimas fone</label>
+                        <input type="checkbox" id="settings-background-location">
+                    </div>
+                    <div class="setting-item">
+                        <label for="settings-background-notifications">Pranešimai fone</label>
+                        <input type="checkbox" id="settings-background-notifications">
+                    </div>
+                    <div class="setting-item">
+                        <label for="settings-theme">Tema</label>
+                        <select id="settings-theme">
+                            <option value="light">Šviesi</option>
+                            <option value="dark">Tamsi</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label for="marker-color">Žemėlapio ženkliuko spalva</label>
+                        <select id="marker-color">
+                            <option value="red">Raudona</option>
+                            <option value="blue">Mėlyna</option>
+                            <option value="green">Žalia</option>
+                            <option value="yellow">Geltona</option>
+                            <option value="purple">Violetinė</option>
+                            <option value="orange">Oranžinė</option>
+                        </select>
+                    </div>
+                </div>
             </div>
             <div id="admin-panel" class="hidden">
                 <h3>Admin Panel</h3>
