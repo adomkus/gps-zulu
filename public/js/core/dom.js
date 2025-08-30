@@ -17,17 +17,20 @@
             showSettingsBtn: document.querySelector('[data-view="settings-view"]'),
             
             // Secondary navigation
-            showGeneralChatBtn: document.querySelector('[data-view="general-chat-view"]'),
-            showMyChatsBtn: document.querySelector('[data-view="my-chats-view"]'),
-            showUnreadChatsBtn: document.querySelector('[data-view="unread-chats-view"]'),
+            showUsersListBtn: document.querySelector('[data-view="users-list-sub-view"]'),
+            showGeneralChatBtn: document.querySelector('[data-view="general-chat-sub-view"]'),
+            showMyChatsBtn: document.querySelector('[data-view="my-chats-sub-view"]'),
+            showUnreadChatsBtn: document.querySelector('[data-view="unread-chats-sub-view"]'),
 
-            // Views
+            // Views & Sub-views
             usersView: document.getElementById('users-view'),
             mapView: document.getElementById('map-view'),
             settingsView: document.getElementById('settings-view'),
-            generalChatView: document.getElementById('general-chat-view'),
-            myChatsView: document.getElementById('my-chats-view'),
-            unreadChatsView: document.getElementById('unread-chats-view'),
+            
+            usersListSubView: document.getElementById('users-list-sub-view'),
+            generalChatSubView: document.getElementById('general-chat-sub-view'),
+            myChatsSubView: document.getElementById('my-chats-sub-view'),
+            unreadChatsSubView: document.getElementById('unread-chats-sub-view'),
 
             // Users
             usersList: document.getElementById('users-list'),

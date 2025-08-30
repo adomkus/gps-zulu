@@ -121,7 +121,10 @@
         
         // Setup auth event listeners
         if (window.AuthModule) {
-            window.AuthModule.setupAuthEventListeners();
+            // Vykdyti tik tada, jei autorizacijos langas yra DOM'e
+            if (document.getElementById('auth-container')) {
+                window.AuthModule.setupAuthEventListeners();
+            }
         }
         
         // Start session management

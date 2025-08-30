@@ -10,8 +10,7 @@
         if (el.showListBtn) {
             el.showListBtn.addEventListener('click', () => {
                 Views.switchView('users-view');
-                // Also, decide which sub-view of users-view to show. Defaulting to user list.
-                Views.switchSecondaryView('users-list-container'); 
+                Views.switchSecondaryView('users-list-sub-view');
             });
         }
         
@@ -249,18 +248,18 @@
         }
 
         // Secondary navigation events
-        el.showGeneralChatBtn.addEventListener('click', () => {
-            Views.switchSecondaryView('general-chat-view');
-            // Since general chat is a full sub-view, we don't need to open the separate chat overlay
+        el.showUsersListBtn.addEventListener('click', () => {
+            Views.switchSecondaryView('users-list-sub-view');
         });
-
+        el.showGeneralChatBtn.addEventListener('click', () => {
+            Views.switchSecondaryView('general-chat-sub-view');
+        });
         el.showMyChatsBtn.addEventListener('click', () => {
-            Views.switchSecondaryView('my-chats-view');
+            Views.switchSecondaryView('my-chats-sub-view');
             Views.renderMyChats();
         });
-
         el.showUnreadChatsBtn.addEventListener('click', () => {
-            if (window.UIModule) window.UIModule.switchSecondaryView('unread-chats-view');
+            Views.switchSecondaryView('unread-chats-sub-view');
         });
 
         // Chat events

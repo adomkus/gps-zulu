@@ -94,22 +94,29 @@
         <div id="main-content">
             <div id="users-view" class="view active">
                 <div id="secondary-bar">
-                    <button class="secondary-nav-btn active" data-view="general-chat-view">Bendras čatas</button>
-                    <button class="secondary-nav-btn" data-view="my-chats-view">Mano pokalbiai</button>
-                    <button class="secondary-nav-btn" data-view="unread-chats-view">Neperskaitytos</button>
+                    <button class="secondary-nav-btn active" data-view="users-list-sub-view">Vartotojai</button>
+                    <button class="secondary-nav-btn" data-view="general-chat-sub-view">Bendras čatas</button>
+                    <button class="secondary-nav-btn" data-view="my-chats-sub-view">Mano pokalbiai</button>
+                    <button class="secondary-nav-btn" data-view="unread-chats-sub-view">Neperskaitytos</button>
                 </div>
-                <div id="users-list-container">
-                    <ul id="users-list"></ul>
-                    <div class="placeholder">Vartotojų sąrašas kraunasi...</div>
-                </div>
-                <div id="general-chat-view" class="sub-view active">
-                    <!-- General chat content will be here, loaded by JS -->
-                </div>
-                <div id="my-chats-view" class="sub-view">
-                    <!-- User's private chats list will be here -->
-                </div>
-                <div id="unread-chats-view" class="sub-view">
-                    <!-- Unread chats list will be here -->
+                <div class="sub-view-container">
+                    <div id="users-list-sub-view" class="sub-view active">
+                        <ul id="users-list"></ul>
+                        <div class="placeholder">Vartotojų sąrašas kraunasi...</div>
+                    </div>
+                    <div id="general-chat-sub-view" class="sub-view">
+                        <div id="general-chat-messages"></div>
+                        <form id="general-chat-form">
+                            <input type="text" id="general-chat-input" placeholder="Jūsų žinutė..." autocomplete="off">
+                            <button type="submit">↑</button>
+                        </form>
+                    </div>
+                    <div id="my-chats-sub-view" class="sub-view">
+                        <!-- User's private chats list will be here -->
+                    </div>
+                    <div id="unread-chats-sub-view" class="sub-view">
+                        <!-- Unread chats list will be here -->
+                    </div>
                 </div>
             </div>
             <div id="map-view" class="view">

@@ -30,8 +30,8 @@
     }
 
     function switchSecondaryView(viewId) {
-        // Hide all sub-views within users-view
-        document.querySelectorAll('#users-view .sub-view').forEach(v => v.classList.remove('active'));
+        // Hide all sub-views within the container
+        document.querySelectorAll('.sub-view-container .sub-view').forEach(v => v.classList.remove('active'));
 
         // Deactivate all secondary nav buttons
         document.querySelectorAll('#secondary-bar .secondary-nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -46,14 +46,6 @@
         const btnToActivate = document.querySelector(`#secondary-bar .secondary-nav-btn[data-view="${viewId}"]`);
         if (btnToActivate) {
             btnToActivate.classList.add('active');
-        }
-
-        // Hide or show the main user list based on the selected view
-        const userListContainer = document.getElementById('users-list-container');
-        if (viewId === 'general-chat-view' || viewId === 'my-chats-view' || viewId === 'unread-chats-view') {
-            userListContainer.style.display = 'none';
-        } else {
-            userListContainer.style.display = 'block';
         }
     }
 
