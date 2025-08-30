@@ -5,34 +5,104 @@
 
     // === VIEW MANAGEMENT ===
     function switchView(viewId) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
+        // Hide all main views
+        document.querySelectorAll('#main-content .view').forEach(v => v.classList.remove('active'));
         
-        const el = window.el || {};
-        el.showMapBtn.classList.remove('active');
-        el.showListBtn.classList.remove('active');
-        
-        // Remove active from all nav buttons
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        
-        if (viewId.includes('map')) {
-            el.showMapBtn.classList.add('active');
-            setTimeout(() => {
-                if (window.MapModule && window.MapModule.getMap) {
-                    const map = window.MapModule.getMap();
-                    map.invalidateSize();
-                    if (window.MapModule.renderMapMarkers) window.MapModule.renderMapMarkers();
-                    if (window.MapModule.updateMapBounds) window.MapModule.updateMapBounds();
-                }
-            }, 100);
-        } else if (viewId.includes('list')) {
-            el.showListBtn.classList.add('active');
-        } else if (viewId.includes('settings')) {
-            // Add active class to settings button
-            const settingsBtn = document.querySelector('[data-view="settings-view"]');
-            if (settingsBtn) settingsBtn.classList.add('active');
+        // Deactivate all main nav buttons
+        document.querySelectorAll('#top-bar .nav-btn').forEach(btn => btn.classList.remove('active'));
+
+        // Show the selected view
+        const viewToShow = document.getElementById(viewId);
+        if (viewToShow) {
+            viewToShow.classList.add('active');
+        }
+
+        // Activate the corresponding nav button
+        const btnToActivate = document.querySelector(`#top-bar .nav-btn[data-view="${viewId}"]`);
+        if (btnToActivate) {
+            btnToActivate.classList.add('active');
+        }
+
+        // Special handling for map view
+        if (viewId === 'map-view' && window.map) {
+            setTimeout(() => window.map.invalidateSize(), 100);
         }
     }
+
+    function switchSecondaryView(viewId) {
+        // Hide all sub-views within users-view
+        document.querySelectorAll('#users-view .sub-view').forEach(v => v.classList.remove('active'));
+
+        // Deactivate all secondary nav buttons
+        document.querySelectorAll('#secondary-bar .secondary-nav-btn').forEach(btn => btn.classList.remove('active'));
+
+        // Show the selected sub-view
+        const viewToShow = document.getElementById(viewId);
+        if (viewToShow) {
+            viewToShow.classList.add('active');
+        }
+        
+        // Activate the corresponding secondary nav button
+        const btnToActivate = document.querySelector(`#secondary-bar .secondary-nav-btn[data-view="${viewId}"]`);
+        if (btnToActivate) {
+            btnToActivate.classList.add('active');
+        }
+
+        // Hide or show the main user list based on the selected view
+        const userListContainer = document.getElementById('users-list-container');
+        if (viewId === 'general-chat-view' || viewId === 'my-chats-view' || viewId === 'unread-chats-view') {
+            userListContainer.style.display = 'none';
+        } else {
+            userListContainer.style.display = 'block';
+        }
+    }
+
+    function renderMyChats() {
+        const myChatsView = document.getElementById('my-chats-view');
+        myChatsView.innerHTML = '<div class="placeholder">Kraunami pokalbiai...</div>';
+
+        Api.fetch('/api/my-chats')
+            .then(chats => {
+                if (chats.length === 0) {
+                    myChatsView.innerHTML = '<div class="placeholder">Jūs kol kas neturite privačių pokalbių.</div>';
+                    return;
+                }
+
+                const chatsList = document.createElement('ul');
+                chatsList.className = 'chats-list';
+                chats.forEach(chat => {
+                    const chatItem = document.createElement('li');
+                    chatItem.className = 'chat-item';
+                    chatItem.addEventListener('click', () => Chat.showChat(chat.room_id, chat.partner_username));
+
+                    const partnerName = document.createElement('span');
+                    partnerName.className = 'partner-name';
+                    partnerName.textContent = chat.partner_username;
+
+                    const lastMessage = document.createElement('span');
+                    lastMessage.className = 'last-message';
+                    lastMessage.textContent = chat.last_message || 'Nėra žinučių';
+
+                    chatItem.appendChild(partnerName);
+                    chatItem.appendChild(lastMessage);
+
+                    if (chat.unread_count > 0) {
+                        const unreadBadge = document.createElement('span');
+                        unreadBadge.className = 'unread-badge';
+                        unreadBadge.textContent = chat.unread_count;
+                        chatItem.appendChild(unreadBadge);
+                    }
+
+                    chatsList.appendChild(chatItem);
+                });
+                myChatsView.innerHTML = '';
+                myChatsView.appendChild(chatsList);
+            })
+            .catch(err => {
+                myChatsView.innerHTML = `<div class="placeholder error">Klaida kraunant pokalbius: ${err.message}</div>`;
+            });
+    }
+
 
     // === USERS LIST RENDERING ===
     function renderUsers(onlineUsersList) {

@@ -14,10 +14,22 @@
             // Main app elements
             showListBtn: document.querySelector('[data-view="users-list-view"]'),
             showMapBtn: document.querySelector('[data-view="map-view"]'),
-            settingsBtn: document.getElementById('settings-btn'),
-            logoutBtn: document.getElementById('logout-btn'),
+            showSettingsBtn: document.querySelector('[data-view="settings-view"]'),
             
-            // Users list
+            // Secondary navigation
+            showGeneralChatBtn: document.querySelector('[data-view="general-chat-view"]'),
+            showMyChatsBtn: document.querySelector('[data-view="my-chats-view"]'),
+            showUnreadChatsBtn: document.querySelector('[data-view="unread-chats-view"]'),
+
+            // Views
+            usersView: document.getElementById('users-view'),
+            mapView: document.getElementById('map-view'),
+            settingsView: document.getElementById('settings-view'),
+            generalChatView: document.getElementById('general-chat-view'),
+            myChatsView: document.getElementById('my-chats-view'),
+            unreadChatsView: document.getElementById('unread-chats-view'),
+
+            // Users
             usersList: document.getElementById('users-list'),
             
             // Chat elements

@@ -197,6 +197,7 @@ app.use((req, res, next) => {
 
 const apiRouter = express.Router();
 const onlineUsers = new Map(); // Naudojame Map geresniam našumui
+const GENERAL_CHAT_ROOM_ID = 1;
 
 // Utility funkcijos
 const utils = {
@@ -627,6 +628,37 @@ apiRouter.get('/rooms/:roomId/messages', async (req, res) => {
     } catch (err) {
         console.error("❌ Klaida gaunant žinutes:", err);
         res.status(500).json({ message: 'Serverio klaida: ' + err.message });
+    }
+});
+
+// Endpoint to get user's private chats
+apiRouter.get('/my-chats', async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ message: 'Nėra autorizacijos.' });
+    }
+
+    try {
+        const userId = req.session.userId;
+        const result = await pool.query(`
+            SELECT 
+                r.id as room_id,
+                u.username as partner_username,
+                u.id as partner_id,
+                (SELECT content FROM messages WHERE room_id = r.id ORDER BY created_at DESC LIMIT 1) as last_message,
+                (SELECT created_at FROM messages WHERE room_id = r.id ORDER BY created_at DESC LIMIT 1) as last_message_date,
+                (SELECT COUNT(*) FROM messages WHERE room_id = r.id AND read_at IS NULL AND sender_id != $1) as unread_count
+            FROM room_participants rp1
+            JOIN rooms r ON r.id = rp1.room_id
+            JOIN room_participants rp2 ON r.id = rp2.room_id AND rp2.user_id != $1
+            JOIN users u ON u.id = rp2.user_id
+            WHERE rp1.user_id = $1 AND r.id != 1 -- Exclude general chat
+            ORDER BY last_message_date DESC
+        `, [userId]);
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error("❌ Error fetching user's chats:", err);
+        res.status(500).json({ message: 'Serverio klaida gaunant pokalbius.' });
     }
 });
 
@@ -1083,6 +1115,17 @@ io.on('connection', async (socket) => {
             io.emit('online users update', Array.from(onlineUsers.values()));
         }
     });
+
+    // Automatiškai pridėti vartotoją į bendrą pokalbių kambarį
+    try {
+        await pool.query(
+            "INSERT INTO room_participants (room_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            [GENERAL_CHAT_ROOM_ID, userId]
+        );
+        log.info(`Vartotojas ${username} pridėtas į bendrą pokalbių kambarį.`);
+    } catch (err) {
+        log.error(`Klaida pridedant vartotoją į bendrą pokalbių kambarį:`, err);
+    }
 });
 
 // Graceful shutdown
@@ -1094,7 +1137,7 @@ process.on('SIGTERM', async () => {
     });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     log.info(`GPS Pokalbių serveris paleistas ant prievado ${PORT}`);
     log.info(`Aplinka: ${process.env.NODE_ENV || 'development'}`);
 });

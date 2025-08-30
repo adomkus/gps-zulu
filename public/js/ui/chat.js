@@ -4,63 +4,40 @@
 
     // === CHAT MANAGEMENT ===
     function showChat(roomId, roomName) {
-        perf.log(`📱 Atidaromas chat: ${roomName} (room ID: ${roomId})`);
+        const chatView = document.getElementById('chat-view');
+        const chatTitle = document.getElementById('chat-header-title');
         
-        const el = window.el || {};
+        // Nustatome pokalbio pavadinimą
+        chatTitle.textContent = roomName || 'Pokalbis';
         
-        // Check if elements exist
-        if (!el.chatView) {
-            perf.log(`❌ Chat view elementas nerastas!`);
-            alert('Klaida: chat view nerastas!');
-            return;
-        }
+        // Saugome dabartinio pokalbio ID
+        chatView.dataset.currentRoomId = roomId;
+
+        // Krauname žinutes
+        loadMessages(roomId);
         
-        // Set chat data
-        window.state.activeChat = { roomId, roomName };
-        el.chatHeaderTitle.textContent = roomName;
-        el.messagesList.innerHTML = '<div class="placeholder">Kraunama...</div>';
-        
-        // Open chat
-        el.chatView.classList.add('active');
-        perf.log(`📱 Chat view atidarytas`);
-        
-        // Add system message
-        addSystemMessage(`💬 Pokalbis "${roomName}" atidarytas!`);
-        
-        // Load messages
-        perf.log(`💬 Kraunamos žinutės kambariui ${roomId}`);
-        window.Api.fetch(`/rooms/${roomId}/messages`)
-            .then(messages => {
-                perf.log(`📨 Gauta ${messages.length} žinučių`);
-                el.messagesList.innerHTML = '';
-                const fragment = document.createDocumentFragment();
-                messages.forEach(msg => {
-                    const msgElement = createMessageElement(msg);
-                    fragment.appendChild(msgElement);
-                });
-                el.messagesList.appendChild(fragment);
-                el.messagesList.scrollTop = el.messagesList.scrollHeight;
-                
-                // Mark messages as read
-                if (window.socket) {
-                    window.socket.emit('mark messages read', { roomId });
-                }
-                
-                // If no messages, show helpful message
-                if (messages.length === 0) {
-                    addSystemMessage('👋 Čia prasideda jūsų pokalbis!');
-                }
-            })
-            .catch(err => {
-                perf.log(`❌ Klaida užkraunant žinutes:`, err);
-                addSystemMessage(`⚠️ Nepavyko užkrauti žinučių. Bandykite dar kartą.`);
-            });
+        // Parodome pokalbio langą
+        chatView.classList.add('active');
     }
 
     function hideChat() {
-        const el = window.el || {};
-        el.chatView.classList.remove('active');
-        window.state.activeChat = { roomId: null, roomName: null };
+        const chatView = document.getElementById('chat-view');
+        chatView.classList.remove('active');
+    }
+
+    function loadMessages(roomId) {
+        const messagesList = document.getElementById('messages-list');
+        messagesList.innerHTML = '<div class="system-message">Kraunamos žinutės...</div>';
+
+        window.Api.fetch(`/api/rooms/${roomId}/messages`)
+            .then(messages => {
+                messagesList.innerHTML = '';
+                messages.forEach(addMessageToUI);
+                messagesList.scrollTop = messagesList.scrollHeight;
+            })
+            .catch(err => {
+                messagesList.innerHTML = `<div class="system-message error">Klaida kraunant žinutes: ${err.message}</div>`;
+            });
     }
 
     // === MESSAGE CREATION ===
@@ -112,10 +89,13 @@
     }
 
     function addMessageToUI(message) {
-        const el = window.el || {};
-        const msgEl = createMessageElement(message);
-        el.messagesList.appendChild(msgEl);
-        el.messagesList.scrollTop = el.messagesList.scrollHeight;
+        const messagesList = document.getElementById('messages-list');
+        const msgElement = createMessageElement(message);
+        messagesList.appendChild(msgElement);
+        // Automatiškai slinkti į apačią, jei esame arti apačios
+        if (messagesList.scrollHeight - messagesList.scrollTop < messagesList.clientHeight + 100) {
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
     }
 
     function addSystemMessage(text) {

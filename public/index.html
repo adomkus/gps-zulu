@@ -86,97 +86,54 @@
         <!-- Top Navigation Bar -->
         <header id="top-bar">
             <div class="nav-controls">
-                <button class="nav-btn active" data-view="users-list-view">Vartotojai</button>
+                <button class="nav-btn active" data-view="users-view">Vartotojai</button>
                 <button class="nav-btn" data-view="map-view">Žemėlapis</button>
                 <button class="nav-btn" data-view="settings-view">Nustatymai</button>
             </div>
         </header>
-
-        <!-- Main Content Area -->
-        <main id="main-content">
-            <!-- Users List View -->
-            <div id="users-list-view" class="view active">
-                <ul id="users-list"></ul>
+        <div id="main-content">
+            <div id="users-view" class="view active">
+                <div id="secondary-bar">
+                    <button class="secondary-nav-btn active" data-view="general-chat-view">Bendras čatas</button>
+                    <button class="secondary-nav-btn" data-view="my-chats-view">Mano pokalbiai</button>
+                    <button class="secondary-nav-btn" data-view="unread-chats-view">Neperskaitytos</button>
+                </div>
+                <div id="users-list-container">
+                    <ul id="users-list"></ul>
+                    <div class="placeholder">Vartotojų sąrašas kraunasi...</div>
+                </div>
+                <div id="general-chat-view" class="sub-view active">
+                    <!-- General chat content will be here, loaded by JS -->
+                </div>
+                <div id="my-chats-view" class="sub-view">
+                    <!-- User's private chats list will be here -->
+                </div>
+                <div id="unread-chats-view" class="sub-view">
+                    <!-- Unread chats list will be here -->
+                </div>
             </div>
-            
-            <!-- Map View -->
             <div id="map-view" class="view">
                 <div id="map"></div>
             </div>
-            
-            <!-- Settings View -->
             <div id="settings-view" class="view">
-                <div id="permissions-status"></div>
-                <div id="connection-status" class="setting-item">
-                    <div>
-                        <div style="font-weight:600">Ryšio būklė</div>
-                        <div id="connection-details">Tikrinama...</div>
-                    </div>
-                    <span id="connection-indicator"></span>
-                </div>
-                
-                <h3>Pranešimų Nustatymai</h3>
-                <div class="setting-item">
-                    <label for="sound-toggle">Garsinis pranešimas</label>
-                    <input type="checkbox" id="sound-toggle">
-                </div>
-                <div class="setting-item">
-                    <label for="vibrate-toggle">Vibracinis pranešimas</label>
-                    <input type="checkbox" id="vibrate-toggle">
-                </div>
-                
-                <h3>Fono Funkcijos</h3>
-                <div class="setting-item">
-                    <label for="background-location-toggle">Vietovės sekimas fone</label>
-                    <input type="checkbox" id="background-location-toggle">
-                </div>
-                <div class="setting-item">
-                    <label for="background-notifications-toggle">Pranešimai fone</label>
-                    <input type="checkbox" id="background-notifications-toggle">
-                </div>
-                
-                <button id="test-audio-btn" class="settings-link-btn">🔊 Išbandyti garsą</button>
-                <button id="test-vibration-btn" class="settings-link-btn">📳 Išbandyti vibraciją</button>
-                
-                <h3>Vaizdo Nustatymai</h3>
-                <div class="setting-item">
-                    <label for="theme-toggle">Naktinė tema</label>
-                    <input type="checkbox" id="theme-toggle">
-                </div>
-                <div class="setting-item">
-                    <label for="marker-color">Markerio spalva</label>
-                    <select id="marker-color">
-                        <option value="red">Raudona</option>
-                        <option value="blue">Mėlyna</option>
-                        <option value="green">Žalia</option>
-                        <option value="orange">Oranžinė</option>
-                        <option value="violet">Violetinė</option>
-                    </select>
-                </div>
-                
-                <!-- Admin Panel -->
-                <div id="admin-panel" class="admin-panel">
-                    <h4>👑 Administratoriaus funkcijos</h4>
-                    <button id="pending-users-btn" class="admin-btn">📋 Nepatvirtinti vartotojai</button>
-                    <button id="admin-log-btn" class="admin-btn">📊 Sistema log'ai</button>
-                </div>
-                
-                <button id="logout-btn">Atsijungti</button>
+                <!-- Settings content here -->
             </div>
-            
-            <!-- Chat View -->
-            <div id="chat-view" class="view">
-                <div id="chat-header">
-                    <button id="back-to-main-btn">&larr;</button>
-                    <span id="chat-header-title"></span>
-                </div>
-                <div id="messages-list"></div>
-                <form id="message-form">
-                    <input id="message-input" autocomplete="off" placeholder="Jūsų žinutė..." />
-                    <button type="submit">&uarr;</button>
-                </form>
+            <div id="admin-panel" class="hidden">
+                <h3>Admin Panel</h3>
+                <button id="show-logs-btn" class="admin-btn">Rodyti LOG'us</button>
             </div>
-        </main>
+        </div>
+        <div id="chat-view">
+            <div id="chat-header">
+                <button id="chat-back-btn">←</button>
+                <h2 id="chat-header-title">Pokalbis</h2>
+            </div>
+            <div id="messages-list"></div>
+            <form id="message-form">
+                <input type="text" id="message-input" placeholder="Jūsų žinutė..." autocomplete="off">
+                <button type="submit">↑</button>
+            </form>
+        </div>
     </div>
 
     <!-- System Logs Modal (Admin only) -->

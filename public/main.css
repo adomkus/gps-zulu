@@ -224,6 +224,38 @@ body, html {
     color: var(--primary-color);
 }
 
+/* ===== SECONDARY BAR ===== */
+#secondary-bar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.secondary-nav-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: transparent;
+    color: var(--muted-text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.secondary-nav-btn:hover {
+    background-color: var(--surface-secondary);
+    color: var(--text-color);
+}
+
+.secondary-nav-btn.active {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
 /* ===== MAIN CONTENT ===== */
 #main-content { 
     flex-grow: 1; 
@@ -553,6 +585,56 @@ body, html {
     padding: 10px;
 }
 
+/* ===== MY CHATS LIST ===== */
+.chats-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative;
+}
+
+.chat-item:hover {
+    background-color: var(--surface-secondary);
+}
+
+.chat-item .partner-name {
+    font-weight: 600;
+    flex-grow: 1;
+}
+
+.chat-item .last-message {
+    color: var(--muted-text);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 50%;
+}
+
+.unread-badge {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 16px;
+}
+
+
 /* ===== SETTINGS ===== */
 .setting-item { 
     display: flex; 
@@ -748,4 +830,29 @@ body, html {
     #context-menu-wrapper { 
         max-width: 90%; 
     }
+}
+
+#users-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#secondary-bar {
+    flex-shrink: 0;
+}
+
+#users-list-container {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.sub-view {
+    display: none;
+}
+
+.sub-view.active {
+    display: block;
+    height: 100%;
+    overflow-y: auto;
 }
