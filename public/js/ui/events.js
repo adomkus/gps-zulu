@@ -281,9 +281,11 @@
 
 
         // Chat events
-        el.chatBackBtn.addEventListener('click', () => {
-            if (window.MessagesModule) window.MessagesModule.hideChat();
-        });
+        if (el.chatBackBtn) {
+            el.chatBackBtn.addEventListener('click', () => {
+                if (window.MessagesModule) window.MessagesModule.hideChat();
+            });
+        }
     }
 
     // === CONTEXT MENU ACTION HANDLER ===
