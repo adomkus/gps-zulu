@@ -5,15 +5,15 @@
     // === CONNECTION MANAGEMENT ===
     function updateConnectionDetails(text, ok) {
         try {
-            const details = document.getElementById('connection-details');
-            const indicator = document.getElementById('connection-indicator');
+            const details = window.el && window.el.connectionDetails ? window.el.connectionDetails : document.getElementById('connection-details');
+            const indicator = window.el && window.el.connectionIndicator ? window.el.connectionIndicator : document.getElementById('connection-indicator');
             if (details && typeof text === 'string') details.textContent = text;
             if (indicator) indicator.style.background = ok ? 'var(--primary-color)' : 'var(--danger-color)';
 
             // Update floating status pill as well
-            const statusPill = document.getElementById('connection-status');
-            const statusText = document.getElementById('connection-text');
-            const dot = document.getElementById('connection-dot');
+            const statusPill = window.el && window.el.connectionStatus ? window.el.connectionStatus : document.getElementById('connection-status');
+            const statusText = window.el && window.el.connectionText ? window.el.connectionText : document.getElementById('connection-text');
+            const dot = window.el && window.el.connectionDot ? window.el.connectionDot : document.getElementById('connection-dot');
             if (statusText && typeof text === 'string') {
                 statusText.textContent = text;
             }

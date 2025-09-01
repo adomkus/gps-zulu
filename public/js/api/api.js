@@ -44,7 +44,7 @@
 
     async function checkSession() {
         try {
-            const res = await fetch(getBase() + '/session');
+            const res = await fetch(getBase() + '/session', { credentials: 'include' });
             if (res.ok) {
                 const data = await res.json();
                 if (data.loggedIn && typeof window.initializeApp === 'function') {

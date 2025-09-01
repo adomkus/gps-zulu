@@ -8,6 +8,15 @@
             perf.log('Geolocation not supported');
             return;
         }
+        
+        // Check if location permission is granted
+        const locationToggle = window.el && window.el.backgroundLocationToggle ? 
+            window.el.backgroundLocationToggle : document.getElementById('settings-background-location');
+        
+        if (locationToggle && !locationToggle.checked) {
+            perf.log('Location updates disabled by user');
+            return;
+        }
 
         const options = {
             enableHighAccuracy: true,

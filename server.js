@@ -1027,18 +1027,13 @@ io.on('connection', async (socket) => {
             
             // Mark all unread messages in this room as read (with safe read_at handling)
             try {
-                await pool.query(
-                    "UPDATE messages SET read_at = NOW() WHERE room_id = $1 AND sender_id != $2 AND read_at IS NULL", 
+                const updated = await pool.query(
+                    "UPDATE messages SET read_at = NOW() WHERE room_id = $1 AND sender_id != $2 AND read_at IS NULL RETURNING id, sender_id", 
                     [roomId, userId]
                 );
                 
-                // Notify message sender about read status
-                const unreadMessages = await pool.query(
-                    "SELECT id, sender_id FROM messages WHERE room_id = $1 AND sender_id != $2 AND read_at IS NULL", 
-                    [roomId, userId]
-                );
-                
-                unreadMessages.rows.forEach(msg => {
+                // Notify message sender about read status for messages just updated
+                updated.rows.forEach(msg => {
                     const senderSocketId = onlineUsers.get(msg.sender_id)?.socketId;
                     if (senderSocketId) {
                         io.to(senderSocketId).emit('message read', { messageId: msg.id });
@@ -1149,16 +1144,7 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // Automatiškai pridėti vartotoją į bendrą pokalbių kambarį
-    try {
-        await pool.query(
-            "INSERT INTO room_participants (room_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
-            [GENERAL_CHAT_ROOM_ID, userId]
-        );
-        log.info(`Vartotojas ${username} pridėtas į bendrą pokalbių kambarį.`);
-    } catch (err) {
-        log.error(`Klaida pridedant vartotoją į bendrą pokalbių kambarį:`, err);
-    }
+    // Bendro kambario pridėjimas jau atliktas aukščiau (877-885)
 });
 
 // Graceful shutdown

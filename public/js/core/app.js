@@ -95,7 +95,11 @@
         const path = (window.AppConfig && window.AppConfig.SOCKET_PATH) ? 
             window.AppConfig.SOCKET_PATH : '/socket.io/';
         
-        const sock = io({
+        // Determine socket URL based on API_BASE_URL config
+        const apiBase = window.AppConfig && window.AppConfig.API_BASE_URL;
+        const socketUrl = apiBase || window.location.origin;
+        
+        const sock = io(socketUrl, {
             path: path,
             timeout: 30000,
             forceNew: true,

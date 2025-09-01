@@ -4,14 +4,26 @@
 
     // === CHAT MANAGEMENT ===
     function showChat(roomId, roomName) {
-        const chatView = document.getElementById('chat-view');
-        const chatTitle = document.getElementById('chat-header-title');
+    const chatView = window.el && window.el.chatView ? window.el.chatView : document.getElementById('chat-view');
+    const chatTitle = window.el && window.el.chatHeaderTitle ? window.el.chatHeaderTitle : document.getElementById('chat-header-title');
         
         // Nustatome pokalbio pavadinimą
         chatTitle.textContent = roomName || 'Pokalbis';
         
         // Saugome dabartinio pokalbio ID
         chatView.dataset.currentRoomId = roomId;
+
+        // Nustatome aktyvų pokalbį globalioje būsenoje
+        try {
+            window.state.activeChat = { roomId: roomId, roomName: roomName };
+        } catch(_) {}
+
+        // Pažymime žinutes kaip perskaitytas serveryje
+        try {
+            if (window.socket && window.socket.connected) {
+                window.socket.emit('mark messages read', { roomId: roomId });
+            }
+        } catch(_) {}
 
         // Krauname žinutes
         loadMessages(roomId);
@@ -21,15 +33,15 @@
     }
 
     function hideChat() {
-        const chatView = document.getElementById('chat-view');
+        const chatView = window.el && window.el.chatView ? window.el.chatView : document.getElementById('chat-view');
         chatView.classList.remove('active');
     }
 
     function loadMessages(roomId) {
-        const messagesList = document.getElementById('messages-list');
+        const messagesList = window.el && window.el.messagesList ? window.el.messagesList : document.getElementById('messages-list');
         messagesList.innerHTML = '<div class="system-message">Kraunamos žinutės...</div>';
 
-        window.Api.fetch(`/api/rooms/${roomId}/messages`)
+        window.Api.fetch(`/rooms/${roomId}/messages`)
             .then(messages => {
                 messagesList.innerHTML = '';
                 messages.forEach(addMessageToUI);
@@ -89,7 +101,7 @@
     }
 
     function addMessageToUI(message) {
-        const messagesList = document.getElementById('messages-list');
+        const messagesList = window.el && window.el.messagesList ? window.el.messagesList : document.getElementById('messages-list');
         const msgElement = createMessageElement(message);
         messagesList.appendChild(msgElement);
         // Automatiškai slinkti į apačią, jei esame arti apačios
@@ -108,9 +120,9 @@
 
     // === GENERAL CHAT FUNCTIONALITY ===
     function setupGeneralChat() {
-        const generalChatForm = document.getElementById('general-chat-form');
-        const generalChatInput = document.getElementById('general-chat-input');
-        const generalChatMessages = document.getElementById('general-chat-messages');
+        const generalChatForm = window.el && window.el.generalChatForm ? window.el.generalChatForm : document.getElementById('general-chat-form');
+        const generalChatInput = window.el && window.el.generalChatInput ? window.el.generalChatInput : document.getElementById('general-chat-input');
+        const generalChatMessages = window.el && window.el.generalChatMessages ? window.el.generalChatMessages : document.getElementById('general-chat-messages');
 
         if (generalChatForm) {
             generalChatForm.addEventListener('submit', function(e) {
@@ -133,7 +145,7 @@
 
         generalChatMessages.innerHTML = '<div class="system-message">Kraunamos žinutės...</div>';
 
-        window.Api.fetch('/api/rooms/1/messages')
+        window.Api.fetch('/rooms/1/messages')
             .then(messages => {
                 generalChatMessages.innerHTML = '';
                 messages.forEach(addGeneralChatMessageToUI);

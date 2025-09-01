@@ -13,7 +13,7 @@
                 throw new Error('Slaptažodis turi būti bent 6 simboliai');
             }
 
-            const rememberMe = document.getElementById('remember-me');
+            const rememberMe = window.el && window.el.rememberMe ? window.el.rememberMe : document.getElementById('remember-me');
 
             const response = await window.Api.fetch(url, {
                 method: 'POST',
@@ -34,7 +34,7 @@
         } catch (error) {
             perf.log(`Auth error: ${error.message}`);
             if (errorElementId) {
-                const errorEl = document.getElementById(errorElementId);
+                const errorEl = window.el && window.el[errorElementId] ? window.el[errorElementId] : document.getElementById(errorElementId);
                 if (errorEl) {
                     errorEl.textContent = error.message;
                     errorEl.style.display = 'block';
@@ -55,7 +55,7 @@
                     const usernameInput = el.loginForm.querySelector('#login-username');
                     if (usernameInput) usernameInput.value = saved;
                 }
-                const remember = document.getElementById('remember-me');
+                const remember = window.el && window.el.rememberMe ? window.el.rememberMe : document.getElementById('remember-me');
                 if (remember) remember.checked = true;
             }
         } catch (e) {
@@ -108,8 +108,8 @@
         }
 
         // Toggle between login and register forms
-        const showRegisterLink = document.getElementById('show-register');
-        const showLoginLink = document.getElementById('show-login');
+        const showRegisterLink = window.el && window.el.showRegisterLink ? window.el.showRegisterLink : document.getElementById('show-register');
+        const showLoginLink = window.el && window.el.showLoginLink ? window.el.showLoginLink : document.getElementById('show-login');
         
         if (showRegisterLink) {
             showRegisterLink.addEventListener('click', () => {

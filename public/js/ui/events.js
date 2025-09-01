@@ -123,8 +123,8 @@
         }
 
         // Test buttons
-        const testAudioBtn = document.getElementById('test-audio-btn');
-        const testVibrationBtn = document.getElementById('test-vibration-btn');
+        const testAudioBtn = window.el && window.el.testAudioBtn ? window.el.testAudioBtn : document.getElementById('test-audio-btn');
+        const testVibrationBtn = window.el && window.el.testVibrationBtn ? window.el.testVibrationBtn : document.getElementById('test-vibration-btn');
         
         if (testAudioBtn) {
             testAudioBtn.addEventListener('click', () => {
@@ -139,8 +139,8 @@
         }
 
         // Admin panel event listeners
-        const pendingUsersBtn = document.getElementById('pending-users-btn');
-        const adminLogBtn = document.getElementById('admin-log-btn');
+        const pendingUsersBtn = window.el && window.el.pendingUsersBtn ? window.el.pendingUsersBtn : document.getElementById('pending-users-btn');
+        const adminLogBtn = window.el && window.el.adminLogBtn ? window.el.adminLogBtn : (document.getElementById('admin-log-btn') || document.getElementById('show-logs-btn'));
         
         if (pendingUsersBtn) {
             pendingUsersBtn.addEventListener('click', () => {
@@ -154,11 +154,11 @@
             });
             
             // Admin log modal controls
-            const logsClose = document.getElementById('logs-close');
-            const logsClear = document.getElementById('logs-clear');
-            const logsCopy = document.getElementById('logs-copy');
-            const logsModal = document.getElementById('logs-modal');
-            const logsBody = document.getElementById('logs-modal-body');
+            const logsClose = window.el && window.el.logsClose ? window.el.logsClose : document.getElementById('logs-close');
+            const logsClear = window.el && window.el.logsClear ? window.el.logsClear : document.getElementById('logs-clear');
+            const logsCopy = window.el && window.el.logsCopy ? window.el.logsCopy : document.getElementById('logs-copy');
+            const logsModal = window.el && window.el.logsModal ? window.el.logsModal : document.getElementById('logs-modal');
+            const logsBody = window.el && window.el.logsModalBody ? window.el.logsModalBody : document.getElementById('logs-modal-body');
             
             if (logsClose) {
                 logsClose.addEventListener('click', () => {
@@ -193,10 +193,10 @@
         // User detail actions - removed as elements don't exist in HTML
 
         // Settings close button
-        const settingsClose = document.getElementById('settings-close');
+        const settingsClose = window.el && window.el.settingsClose ? window.el.settingsClose : document.getElementById('settings-close');
         if (settingsClose) {
             settingsClose.addEventListener('click', () => {
-                const settingsModal = document.getElementById('settings-modal');
+                const settingsModal = window.el && window.el.settingsModal ? window.el.settingsModal : document.getElementById('settings-modal');
                 if (settingsModal) settingsModal.classList.add('hidden');
             });
         }
@@ -216,7 +216,7 @@
                 if (el.userDetailModal && !el.userDetailModal.classList.contains('hidden')) {
                     if (window.UserDetailUI) window.UserDetailUI.hide();
                 }
-                const connModal = document.getElementById('conn-modal');
+                const connModal = window.el && window.el.connModal ? window.el.connModal : document.getElementById('conn-modal');
                 if (connModal && connModal.style.display !== 'none') connModal.style.display = 'none';
             }
         });

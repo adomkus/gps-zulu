@@ -18,7 +18,7 @@
         },
         
         updatePermissionStatus() {
-            const statusEl = document.getElementById('permissions-status');
+            const statusEl = window.el && window.el.permissionsStatus ? window.el.permissionsStatus : document.getElementById('permissions-status');
             if (!statusEl) return;
             
             let statusHTML = '';
@@ -129,8 +129,8 @@
             if (shouldShowNotification) {
                 try {
                     const notification = new Notification(title, {
-                        icon: '/gps/favicon.ico',
-                        badge: '/gps/favicon.ico',
+                        icon: '/favicon.ico',
+                        badge: '/favicon.ico',
                         tag: 'gps-message',
                         requireInteraction: false,
                         silent: false,

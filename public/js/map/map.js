@@ -10,8 +10,15 @@
     function initMap() {
         if (map) return map;
         
+        // Get map container using window.el if available
+        const mapContainer = window.el && window.el.mapContainer ? window.el.mapContainer : document.getElementById('map');
+        if (!mapContainer) {
+            perf.log('❌ Map container not found');
+            return null;
+        }
+        
         // Initialize map
-        map = L.map('map', {
+        map = L.map(mapContainer, {
             center: [55.7, 24.3],
             zoom: 7,
             zoomControl: true,

@@ -61,8 +61,8 @@
         const state = window.state || {};
         if (!state.currentUser?.isAdmin) return;
         
-        const modal = document.getElementById('logs-modal');
-        const body = document.getElementById('logs-modal-body');
+        const modal = window.el && window.el.logsModal ? window.el.logsModal : document.getElementById('logs-modal');
+        const body = window.el && window.el.logsModalBody ? window.el.logsModalBody : document.getElementById('logs-modal-body');
         if (modal && body) {
             body.textContent = (window.__logBuffer || []).join('\n');
             modal.style.display = 'flex';

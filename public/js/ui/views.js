@@ -11,8 +11,13 @@
         // Deactivate all main nav buttons
         document.querySelectorAll('#top-bar .nav-btn').forEach(btn => btn.classList.remove('active'));
 
-        // Show the selected view
-        const viewToShow = document.getElementById(viewId);
+        // Show the selected view using window.el if available
+        let viewToShow;
+        if (window.el && window.el[viewId.replace('-', '')]) {
+            viewToShow = window.el[viewId.replace('-', '')];
+        } else {
+            viewToShow = document.getElementById(viewId);
+        }
         if (viewToShow) {
             viewToShow.classList.add('active');
         }
@@ -36,8 +41,13 @@
         // Deactivate all secondary nav buttons
         document.querySelectorAll('#secondary-bar .secondary-nav-btn').forEach(btn => btn.classList.remove('active'));
 
-        // Show the selected sub-view
-        const viewToShow = document.getElementById(viewId);
+        // Show the selected sub-view using window.el if available
+        let viewToShow;
+        if (window.el && window.el[viewId.replace(/-/g, '')]) {
+            viewToShow = window.el[viewId.replace(/-/g, '')];
+        } else {
+            viewToShow = document.getElementById(viewId);
+        }
         if (viewToShow) {
             viewToShow.classList.add('active');
         }
@@ -50,10 +60,10 @@
     }
 
     function renderMyChats() {
-        const myChatsView = document.getElementById('my-chats-sub-view');
+        const myChatsView = window.el && window.el.myChatsSubView ? window.el.myChatsSubView : document.getElementById('my-chats-sub-view');
         myChatsView.innerHTML = '<div class="placeholder">Kraunami pokalbiai...</div>';
 
-        Api.fetch('/api/my-chats')
+        Api.fetch('/my-chats')
             .then(chats => {
                 if (chats.length === 0) {
                     myChatsView.innerHTML = '<div class="placeholder">Jūs kol kas neturite privačių pokalbių.</div>';

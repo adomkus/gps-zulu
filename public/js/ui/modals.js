@@ -40,7 +40,7 @@
         const el = window.el || {};
         showContextMenu(user);
         try {
-            const wrapper = document.getElementById('context-menu-wrapper');
+            const wrapper = window.el && window.el.contextMenuWrapper ? window.el.contextMenuWrapper : document.getElementById('context-menu-wrapper');
             if (wrapper && point) {
                 wrapper.style.position = 'absolute';
                 wrapper.style.left = Math.max(8, Math.min(window.innerWidth - 220, point.x + 12)) + 'px';
@@ -218,8 +218,8 @@
         const state = window.state || {};
         if (!state.currentUser?.isAdmin) return;
         
-        const modal = document.getElementById('logs-modal');
-        const body = document.getElementById('logs-modal-body');
+        const modal = window.el && window.el.logsModal ? window.el.logsModal : document.getElementById('logs-modal');
+        const body = window.el && window.el.logsModalBody ? window.el.logsModalBody : document.getElementById('logs-modal-body');
         if (modal && body) {
             body.textContent = (window.__logBuffer || []).join('\n');
             modal.style.display = 'flex';

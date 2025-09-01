@@ -7,9 +7,10 @@
             authContainer: document.getElementById('auth-container'),
             appContainer: document.getElementById('app-container'),
             loginForm: document.getElementById('login-form'),
-            registerForm: document.getElementById('register-form'),
+            registerForm: document.getElementById('register-form-submit'),
             showRegisterLink: document.getElementById('show-register'),
             showLoginLink: document.getElementById('show-login'),
+            rememberMe: document.getElementById('remember-me'),
             
             // Main app elements
             showListBtn: document.querySelector('[data-view="users-list-view"]'),
@@ -26,6 +27,7 @@
             usersView: document.getElementById('users-view'),
             mapView: document.getElementById('map-view'),
             settingsView: document.getElementById('settings-view'),
+            mapContainer: document.getElementById('map'),
             
             usersListSubView: document.getElementById('users-list-sub-view'),
             generalChatSubView: document.getElementById('general-chat-sub-view'),
@@ -42,13 +44,14 @@
             messageForm: document.getElementById('message-form'),
             messageInput: document.getElementById('message-input'),
             backToMainBtn: document.getElementById('back-to-main-btn'),
+            chatBackBtn: document.getElementById('chat-back-btn'),
             
             // Settings elements
-            soundToggle: document.getElementById('sound-toggle'),
-            vibrateToggle: document.getElementById('vibrate-toggle'),
-            backgroundLocationToggle: document.getElementById('background-location-toggle'),
-            backgroundNotificationsToggle: document.getElementById('background-notifications-toggle'),
-            themeToggle: document.getElementById('theme-toggle'),
+            soundToggle: document.getElementById('settings-sound'),
+            vibrateToggle: document.getElementById('settings-vibrate'),
+            backgroundLocationToggle: document.getElementById('settings-background-location'),
+            backgroundNotificationsToggle: document.getElementById('settings-background-notifications'),
+            themeToggle: document.getElementById('settings-theme'),
             testAudioBtn: document.getElementById('test-audio-btn'),
             testVibrationBtn: document.getElementById('test-vibration-btn'),
             
@@ -56,6 +59,7 @@
             contextMenuOverlay: document.getElementById('context-menu-overlay'),
             contextMenuTitle: document.getElementById('context-menu-title'),
             contextMenuActions: document.getElementById('context-menu-actions'),
+            contextMenuWrapper: document.getElementById('context-menu-wrapper'),
             
             // User detail modal
             userDetailModal: document.getElementById('user-detail-modal'),
@@ -67,6 +71,12 @@
             // Connection elements
             connectionDetails: document.getElementById('connection-details'),
             connectionIndicator: document.getElementById('connection-indicator'),
+            connectionStatus: document.getElementById('connection-status'),
+            connectionText: document.getElementById('connection-text'),
+            connectionDot: document.getElementById('connection-dot'),
+            
+            // Permissions status
+            permissionsStatus: document.getElementById('permissions-status'),
 
             // Settings
             settingsSound: document.getElementById('settings-sound'),
@@ -77,6 +87,37 @@
             markerColor: document.getElementById('marker-color'),
 
             // Chat
+            generalChatForm: document.getElementById('general-chat-form'),
+            generalChatInput: document.getElementById('general-chat-input'),
+            generalChatMessages: document.getElementById('general-chat-messages'),
+            
+            // Admin elements
+            pendingUsersBtn: document.getElementById('pending-users-btn'),
+            adminLogBtn: document.getElementById('admin-log-btn'),
+            
+            // Modal controls
+            logsClose: document.getElementById('logs-close'),
+            logsClear: document.getElementById('logs-clear'),
+            logsCopy: document.getElementById('logs-copy'),
+            logsModal: document.getElementById('logs-modal'),
+            logsModalBody: document.getElementById('logs-modal-body'),
+            
+            // Settings modal
+            settingsClose: document.getElementById('settings-close'),
+            settingsModal: document.getElementById('settings-modal'),
+            
+            // Connection modal
+            connModal: document.getElementById('conn-modal'),
+            
+            // Following indicator
+            followingIndicator: document.getElementById('following-indicator'),
+            
+            // Logout button
+            logoutBtn: document.getElementById('logout-btn'),
+            
+            // Connection modal elements
+            connClose: document.getElementById('conn-close'),
+            connBody: document.getElementById('conn-body'),
         };
     }
 

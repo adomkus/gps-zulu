@@ -94,7 +94,10 @@
             }
             
             // Start background location updates if enabled
-            if (state.settings && state.settings.backgroundLocation) {
+            const backgroundLocationToggle = window.el && window.el.backgroundLocationToggle ? 
+                window.el.backgroundLocationToggle : document.getElementById('settings-background-location');
+            
+            if (backgroundLocationToggle && backgroundLocationToggle.checked) {
                 this.startBackgroundLocationUpdates();
             }
         },

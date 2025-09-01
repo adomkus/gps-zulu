@@ -159,6 +159,14 @@
                             <option value="orange">Oranžinė</option>
                         </select>
                     </div>
+                    <div class="setting-item">
+                        <button id="test-audio-btn" class="admin-btn">Išbandyti garsą</button>
+                        <button id="test-vibration-btn" class="admin-btn">Išbandyti vibraciją</button>
+                    </div>
+                    <div class="setting-item" style="display: none;">
+                        <div id="connection-details">Tikrinama...</div>
+                        <div id="connection-indicator"></div>
+                    </div>
                 </div>
             </div>
             <div id="admin-panel" class="hidden">
@@ -169,6 +177,7 @@
         <div id="chat-view">
             <div id="chat-header">
                 <button id="chat-back-btn">←</button>
+                <button id="back-to-main-btn">🏠</button>
                 <h2 id="chat-header-title">Pokalbis</h2>
             </div>
             <div id="messages-list"></div>

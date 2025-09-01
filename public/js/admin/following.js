@@ -73,7 +73,7 @@
     }
 
     function showIndicator(username) {
-        let indicator = document.getElementById('following-indicator');
+        let indicator = window.el && window.el.followingIndicator ? window.el.followingIndicator : document.getElementById('following-indicator');
         if (!indicator) {
             indicator = document.createElement('div');
             indicator.id = 'following-indicator';
@@ -107,7 +107,7 @@
     }
 
     function hideIndicator() {
-        const indicator = document.getElementById('following-indicator');
+        const indicator = window.el && window.el.followingIndicator ? window.el.followingIndicator : document.getElementById('following-indicator');
         if (indicator) {
             indicator.style.display = 'none';
         }
