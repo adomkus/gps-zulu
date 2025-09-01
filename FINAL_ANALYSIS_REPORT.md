@@ -18,6 +18,16 @@
 - **Failai:** `dom.js`, `views.js`, `chat.js`, `auth.js`, `events.js`, `modals.js`, `admin.js`, `notifications.js`, `socket.js`, `following.js`
 - **Statusas:** ✅ UŽBAIGTA - visi moduliai atnaujinti
 
+### 12. ✅ Submeniu navigacijos pataisymas
+- **Problema:** Submeniu mygtukai neturėjo event listener'ų, po paspaudimo submeniu dingdavo ir langas likdavo tuščias
+- **Sprendimas:** Pridėti event listener'us submeniu mygtukams ir trūkstamas DOM referencijas
+- **Failai:** `events.js`, `dom.js`, `views.js`
+- **Pakeitimai:**
+  - Pridėti `showUsersListBtn`, `showGeneralChatBtn`, `showMyChatsBtn`, `showUnreadChatsBtn` event listener'ai
+  - Pridėti DOM referencijos `window.el` objekte
+  - Sukurta `renderUnreadChats` funkcija
+- **Statusas:** ✅ UŽBAIGTA - visi submeniu mygtukai veikia
+
 ### 2. ✅ DOM ID atitikčių taisymas
 - **Problema:** JavaScript ieško elementų, kurių nėra HTML
 - **Sprendimas:** Pridėti trūkstamus elementus ir suderinti ID

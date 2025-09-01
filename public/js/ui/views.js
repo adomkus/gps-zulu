@@ -104,6 +104,53 @@
                 myChatsView.innerHTML = `<div class="placeholder error">Klaida kraunant pokalbius: ${err.message}</div>`;
             });
     }
+    
+    function renderUnreadChats() {
+        const unreadChatsView = window.el && window.el.unreadChatsSubView ? window.el.unreadChatsSubView : document.getElementById('unread-chats-sub-view');
+        unreadChatsView.innerHTML = '<div class="placeholder">Kraunami neperskaityti pokalbiai...</div>';
+
+        Api.fetch('/my-chats')
+            .then(chats => {
+                const unreadChats = chats.filter(chat => chat.unread_count > 0);
+                
+                if (unreadChats.length === 0) {
+                    unreadChatsView.innerHTML = '<div class="placeholder">Nėra neperskaitytų pokalbių.</div>';
+                    return;
+                }
+
+                const chatsList = document.createElement('ul');
+                chatsList.className = 'chats-list';
+                unreadChats.forEach(chat => {
+                    const chatItem = document.createElement('li');
+                    chatItem.className = 'chat-item unread';
+                    chatItem.addEventListener('click', () => Chat.showChat(chat.room_id, chat.partner_username));
+
+                    const partnerName = document.createElement('span');
+                    partnerName.className = 'partner-name';
+                    partnerName.textContent = chat.partner_username;
+
+                    const lastMessage = document.createElement('span');
+                    lastMessage.className = 'last-message';
+                    lastMessage.textContent = chat.last_message || 'Nėra žinučių';
+
+                    const unreadBadge = document.createElement('span');
+                    unreadBadge.className = 'unread-badge';
+                    unreadBadge.textContent = chat.unread_count;
+
+                    chatItem.appendChild(partnerName);
+                    chatItem.appendChild(lastMessage);
+                    chatItem.appendChild(unreadBadge);
+
+                    chatsList.appendChild(chatItem);
+                });
+                unreadChatsView.innerHTML = '';
+                unreadChatsView.appendChild(chatsList);
+            })
+            .catch(error => {
+                perf.log('Error loading unread chats:', error);
+                unreadChatsView.innerHTML = '<div class="placeholder error">Klaida kraunant neperskaitytus pokalbius.</div>';
+            });
+    }
 
 
     // === USERS LIST RENDERING ===
@@ -269,6 +316,7 @@
         switchSecondaryView: switchSecondaryView,
         renderUsers: renderUsers,
         renderMyChats: renderMyChats,
+        renderUnreadChats: renderUnreadChats,
         handleMapPopupAction: handleMapPopupAction
     };
     

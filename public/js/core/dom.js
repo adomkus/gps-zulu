@@ -91,6 +91,12 @@
             generalChatInput: document.getElementById('general-chat-input'),
             generalChatMessages: document.getElementById('general-chat-messages'),
             
+            // Secondary navigation buttons
+            showUsersListBtn: document.querySelector('[data-view="users-list-sub-view"]'),
+            showGeneralChatBtn: document.querySelector('[data-view="general-chat-sub-view"]'),
+            showMyChatsBtn: document.querySelector('[data-view="my-chats-sub-view"]'),
+            showUnreadChatsBtn: document.querySelector('[data-view="unread-chats-sub-view"]'),
+            
             // Admin elements
             pendingUsersBtn: document.getElementById('pending-users-btn'),
             adminLogBtn: document.getElementById('admin-log-btn'),

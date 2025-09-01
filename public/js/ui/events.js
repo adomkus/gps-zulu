@@ -14,6 +14,37 @@
             });
         }
         
+        // Secondary navigation event listeners
+        if (el.showUsersListBtn) {
+            el.showUsersListBtn.addEventListener('click', () => {
+                Views.switchSecondaryView('users-list-sub-view');
+            });
+        }
+        
+        if (el.showGeneralChatBtn) {
+            el.showGeneralChatBtn.addEventListener('click', () => {
+                Views.switchSecondaryView('general-chat-sub-view');
+                // Setup general chat when switching to it
+                if (window.Chat && window.Chat.setupGeneralChat) {
+                    window.Chat.setupGeneralChat();
+                }
+            });
+        }
+        
+        if (el.showMyChatsBtn) {
+            el.showMyChatsBtn.addEventListener('click', () => {
+                Views.switchSecondaryView('my-chats-sub-view');
+                Views.renderMyChats();
+            });
+        }
+        
+        if (el.showUnreadChatsBtn) {
+            el.showUnreadChatsBtn.addEventListener('click', () => {
+                Views.switchSecondaryView('unread-chats-sub-view');
+                Views.renderUnreadChats();
+            });
+        }
+        
         if (el.showMapBtn) {
             el.showMapBtn.addEventListener('click', () => {
                 if (window.UIModule) window.UIModule.switchView('map-view');
@@ -247,23 +278,7 @@
             connClose.addEventListener('click', () => { connModal.style.display = 'none'; });
         }
 
-        // Secondary navigation events
-        el.showUsersListBtn.addEventListener('click', () => {
-            Views.switchSecondaryView('users-list-sub-view');
-        });
-        el.showGeneralChatBtn.addEventListener('click', () => {
-            Views.switchSecondaryView('general-chat-sub-view');
-            if (window.Chat && window.Chat.setupGeneralChat) {
-                window.Chat.setupGeneralChat();
-            }
-        });
-        el.showMyChatsBtn.addEventListener('click', () => {
-            Views.switchSecondaryView('my-chats-sub-view');
-            Views.renderMyChats();
-        });
-        el.showUnreadChatsBtn.addEventListener('click', () => {
-            Views.switchSecondaryView('unread-chats-sub-view');
-        });
+
 
         // Chat events
         el.chatBackBtn.addEventListener('click', () => {
